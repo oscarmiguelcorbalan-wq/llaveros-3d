@@ -330,13 +330,16 @@ function svgEmoji(d, opts) {
   const azul = d.hex || "#1d6fe0", azulOsc = tono(azul, -0.3);
   const id = "a" + Math.random().toString(36).slice(2, 8);
   const n = Math.max(1, largo(texto));
-  const fs = Math.min(29, 190 / (n * 0.74));
+  // Nombre entre la cara y el borde: arco suave (radio 112) con la base a y=189 en el centro.
+  // Letra ~1 mm más alta que antes (≈34 frente a 29) y reparto uniforme con espaciado proporcional.
+  const fs = Math.min(34, 150 / (n * 0.74));
+  const esp = (fs * 0.09).toFixed(1);
   let cara = "";
   if (tieneCara(emoji)) cara = `<circle cx="100" cy="97" r="58" fill="${AMARILLO_OSC}"/><circle cx="100" cy="94" r="58" fill="${AMARILLO}"/>${CARAS[emoji]}`;
   else if (emoji) cara = `<text x="100" y="${texto ? 96 : 110}" font-size="${texto ? 92 : 110}" text-anchor="middle" dominant-baseline="central">${esc(emoji)}</text>`;
-  const nombre = texto ? `<defs><path id="${id}" d="M 34 150 A 70 70 0 0 0 166 150"/></defs>
-    <text font-family="Fredoka, sans-serif" font-weight="700" font-size="${fs.toFixed(1)}" letter-spacing="1.5" fill="${azulOsc}" transform="translate(0,2.2)"><textPath href="#${id}" startOffset="50%" text-anchor="middle">${esc(texto)}</textPath></text>
-    <text font-family="Fredoka, sans-serif" font-weight="700" font-size="${fs.toFixed(1)}" letter-spacing="1.5" fill="${azul}"><textPath href="#${id}" startOffset="50%" text-anchor="middle">${esc(texto)}</textPath></text>` : "";
+  const nombre = texto ? `<defs><path id="${id}" d="M 12 146.3 A 112 112 0 0 0 188 146.3"/></defs>
+    <text font-family="Fredoka, sans-serif" font-weight="700" font-size="${fs.toFixed(1)}" letter-spacing="${esp}" fill="${azulOsc}" transform="translate(0,1.6)"><textPath href="#${id}" startOffset="50%" text-anchor="middle">${esc(texto)}</textPath></text>
+    <text font-family="Fredoka, sans-serif" font-weight="700" font-size="${fs.toFixed(1)}" letter-spacing="${esp}" fill="${azul}"><textPath href="#${id}" startOffset="50%" text-anchor="middle">${esc(texto)}</textPath></text>` : "";
   const centroCara = !texto && tieneCara(emoji) ? `<g transform="translate(0,12)">${cara}</g>` : cara;
   return `<svg viewBox="2 4 196 206" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc("Llavero " + emoji + " " + texto)}">
     <circle cx="100" cy="110" r="94" fill="#d8d8d2"/>
