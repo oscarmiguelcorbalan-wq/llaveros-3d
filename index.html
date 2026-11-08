@@ -94,7 +94,7 @@ textarea.inp{min-height:80px;resize:vertical}
 .emo[aria-pressed="true"]{border-color:var(--pri);background:var(--pri-soft)}
 .emo.sin{font-size:.8rem;font-weight:800;color:var(--muted)}
 .emo svg{width:40px;height:40px}
-.emojis.grandes{grid-template-columns:repeat(3,1fr);gap:10px}
+.emojis.grandes{grid-template-columns:repeat(4,1fr);gap:8px}
 .emojis.grandes .emo{height:auto;aspect-ratio:1;border-radius:20px}
 .emojis.grandes .emo svg{width:72%;height:auto}
 @media(min-width:600px){.emojis.grandes{grid-template-columns:repeat(6,1fr)}}
@@ -308,6 +308,11 @@ function lagrima(cx, cy, fill) {
 const traz = (d, w) => `<path d="${d}" fill="none" stroke="${NEGRO}" stroke-width="${w || 4.5}" stroke-linecap="round"/>`;
 const CEJAS = traz("M73 64 Q83 57 93 61", 4) + traz("M107 61 Q117 57 127 64", 4);
 const OJOS_CERRADOS = traz("M74 88 Q84 76 94 88", 5) + traz("M106 88 Q116 76 126 88", 5);
+const OJO = cx => `<ellipse cx="${cx}" cy="84" rx="6.5" ry="9.5" fill="${NEGRO}"/><circle cx="${cx - 2}" cy="80" r="2.2" fill="#fff"/>`;
+const SONRISA = traz("M72 110 Q100 136 128 110", 6.5);
+const MEJILLAS = `<ellipse cx="66" cy="106" rx="10" ry="6" fill="#ff7d7d" opacity=".7"/><ellipse cx="134" cy="106" rx="10" ry="6" fill="#ff7d7d" opacity=".7"/>`;
+const DIENTES = `<path fill="${NEGRO}" d="M62 102 Q100 111 138 102 Q134 142 100 143 Q66 142 62 102 Z"/><path fill="#fff" d="M67 105 Q100 113 133 105 L131 118 Q100 124 69 118 Z"/>`;
+const LENGUA = `<path fill="${NEGRO}" d="M70 106 Q100 114 130 106 Q126 124 100 125 Q74 124 70 106 Z"/><path fill="${ROJO}" d="M86 116 Q100 112 114 116 L114 132 Q114 146 100 146 Q86 146 86 132 Z"/>` + `<path d="M100 120 V138" stroke="#c92f2f" stroke-width="2.5" stroke-linecap="round"/>`;
 const BOCA_ABIERTA = `<path fill="${NEGRO}" d="M62 102 Q100 111 138 102 Q134 142 100 143 Q66 142 62 102 Z"/><path fill="${ROJO}" d="M77 129 Q100 115 123 129 Q114 142 100 143 Q86 142 77 129 Z"/>`;
 const CARAS = {
   "😉": CEJAS + `<ellipse cx="84" cy="84" rx="6.5" ry="9.5" fill="${NEGRO}"/><circle cx="82" cy="80" r="2.2" fill="#fff"/>` + traz("M106 88 Q116 78 126 88", 5) + BOCA_ABIERTA,
@@ -316,7 +321,24 @@ const CARAS = {
         `<path fill="${NEGRO}" d="M50 71 H150 V79 H146 Q145 103 122 104 Q104 104 103 82 H97 Q96 104 78 104 Q55 103 54 79 H50 Z"/>` + traz("M74 118 Q100 136 126 118", 7),
   "😂": CEJAS + OJOS_CERRADOS + lagrima(64, 102, "#2fa6ff") + lagrima(136, 102, "#2fa6ff") + BOCA_ABIERTA,
   "🤩": CEJAS + `<polygon fill="#ffe14d" stroke="#e8b400" stroke-width="2" stroke-linejoin="round" points="${estrella(81, 85, 20, 9, 5)}"/><polygon fill="#ffe14d" stroke="#e8b400" stroke-width="2" stroke-linejoin="round" points="${estrella(119, 85, 20, 9, 5)}"/>` + BOCA_ABIERTA,
-  "😄": CEJAS + OJOS_CERRADOS + BOCA_ABIERTA
+  "😄": CEJAS + OJOS_CERRADOS + BOCA_ABIERTA,
+  "😁": CEJAS + OJOS_CERRADOS + DIENTES,
+  "😊": OJOS_CERRADOS + MEJILLAS + SONRISA,
+  "😜": CEJAS + OJO(84) + traz("M106 88 Q116 78 126 88", 5) + LENGUA,
+  "😛": CEJAS + OJO(82) + OJO(118) + LENGUA,
+  "😇": `<ellipse cx="100" cy="42" rx="30" ry="7" fill="none" stroke="#3fb6ff" stroke-width="6"/>` + OJOS_CERRADOS + MEJILLAS + SONRISA,
+  "😘": CEJAS + OJO(84) + traz("M106 88 Q116 78 126 88", 5) + traz("M98 108 Q110 112 99 118 Q110 122 98 128", 5) + corazon(128, 120, 9, ROJO),
+  "🥰": OJOS_CERRADOS + MEJILLAS + SONRISA + corazon(54, 60, 9, ROJO) + corazon(148, 58, 8, ROJO) + corazon(152, 120, 9, ROJO),
+  "😋": OJOS_CERRADOS + `<ellipse cx="117" cy="125" rx="8" ry="11" transform="rotate(-25 117 125)" fill="${ROJO}"/>` + SONRISA,
+  "🤓": `<circle cx="80" cy="86" r="15" fill="#fff" stroke="${NEGRO}" stroke-width="6"/><circle cx="120" cy="86" r="15" fill="#fff" stroke="${NEGRO}" stroke-width="6"/>` +
+        traz("M95 84 Q100 80 105 84", 5) + `<circle cx="82" cy="88" r="5.5" fill="${NEGRO}"/><circle cx="122" cy="88" r="5.5" fill="${NEGRO}"/>` +
+        `<path fill="${NEGRO}" d="M72 110 Q100 116 128 110 Q124 136 100 137 Q76 136 72 110 Z"/><path fill="#fff" d="M90 112 H110 V122 Q100 124 90 122 Z"/>` + traz("M100 112 V122", 2),
+  "😅": CEJAS + OJOS_CERRADOS + DIENTES + lagrima(140, 62, "#2fa6ff"),
+  "🥳": OJOS_CERRADOS + SONRISA + MEJILLAS +
+        `<path fill="#8a5cff" d="M112 44 L150 26 L146 66 Z"/><circle cx="130" cy="44" r="3" fill="#ffe14d"/><circle cx="142" cy="38" r="3" fill="#ff5fa2"/><circle cx="141" cy="54" r="3" fill="#3fb6ff"/><circle cx="150" cy="26" r="5" fill="#ffe14d"/>` +
+        `<rect x="50" y="56" width="6" height="10" rx="2" fill="#ff5fa2" transform="rotate(-25 53 61)"/><rect x="58" y="40" width="6" height="10" rx="2" fill="#3fb6ff" transform="rotate(20 61 45)"/><rect x="44" y="76" width="6" height="10" rx="2" fill="#21a645" transform="rotate(40 47 81)"/>`,
+  "😴": traz("M74 84 Q84 93 94 84", 5) + traz("M106 84 Q116 93 126 84", 5) + `<ellipse cx="100" cy="120" rx="9" ry="11" fill="${NEGRO}"/>` +
+        `<text x="128" y="62" font-family="Fredoka, sans-serif" font-weight="700" font-size="22" fill="#2f80ed">Z</text><text x="146" y="46" font-family="Fredoka, sans-serif" font-weight="700" font-size="15" fill="#2f80ed">z</text>`
 };
 const tieneCara = e => !!CARAS[e];
 /* Cara sola (para los botones del catálogo) */
@@ -883,7 +905,7 @@ function admCatalogo() {
           <label class="chk"><input type="checkbox" data-c="${k}" data-k="activo" ${x.activo ? "checked" : ""}>Activo</label>
           <button class="x" data-xc="${k}" aria-label="Borrar">✕</button></div>`).join("")}</div>
         <button class="btn sec sm" id="addC" style="margin-top:10px">＋ Añadir color</button></section>
-      <section class="card"><h3>Emojis</h3><p class="help">Toca un emoji para activarlo o desactivarlo (los apagados no se muestran a los clientes). Mantén pulsado para borrarlo. Los diseños 😉 😍 😎 😂 🤩 😄 se dibujan como vuestros llaveros; cualquier otro emoji se muestra tal cual.</p>
+      <section class="card"><h3>Emojis</h3><p class="help">Toca un emoji para activarlo o desactivarlo (los apagados no se muestran a los clientes). Mantén pulsado para borrarlo. Los diseños 😉 😍 😎 😂 🤩 😄 😁 😊 😜 😛 😇 😘 🥰 😋 🤓 😅 🥳 😴 se dibujan como vuestros llaveros; cualquier otro emoji se muestra tal cual.</p>
         <div class="emoAdmin">${c.emojis.map((e, k) => `<button class="${e.activo ? "" : "off"}" data-e="${k}" aria-pressed="${e.activo}">${tieneCara(e.emoji) ? caraSVG(e.emoji) : esc(e.emoji)}</button>`).join("")}</div>
         <div class="row" style="margin-top:10px"><input class="inp" id="nuevosE" placeholder="Pega aquí emojis nuevos: 🐙🦖🎃" style="flex:1"><button class="btn sm" id="addE">Añadir</button></div></section>
       <div id="msgC"></div>
