@@ -225,6 +225,8 @@ const leer = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSO
 const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const borrar = k => { try { localStorage.removeItem(k); } catch (e) {} };
 const largo = s => Array.from(s || "").length;
+/* Teléfono para WhatsApp: España (9 cifras) → 34…; Andorra (376…) y otros ya llevan prefijo */
+const telWa = t => { t = String(t || ""); return t.length === 9 && t.indexOf("376") !== 0 ? "34" + t : t; };
 function toast(t, ms) { const d = document.createElement("div"); d.className = "toast"; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), ms || 2600); }
 function fecha(f) { if (!f) return ""; const [d, h] = String(f).split(" "); const p = d.split("-"); return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}${h ? " " + h : ""}` : f; }
 function cargando(t) { app.innerHTML = `<div class="cargando"><div class="spin"></div>${esc(t || "Cargando…")}</div>`; }
@@ -483,7 +485,8 @@ function vistaEntrar(modo) {
   let form = "";
   if (modo === "registro") form = `<form id="fm" class="card" novalidate>
       <label class="f" for="nombre">Nombre</label><input class="inp" id="nombre" autocomplete="name" required maxlength="40">
-      <label class="f" for="tel">Teléfono</label><input class="inp" id="tel" type="tel" inputmode="tel" autocomplete="tel" required placeholder="600 123 456">
+      <label class="f" for="tel">Teléfono</label><input class="inp" id="tel" type="tel" inputmode="tel" autocomplete="tel" required placeholder="600 123 456 o 376 123 456">
+      <div class="help">España o Andorra sin más. Otros países: con prefijo (+33…).</div>
       <label class="f" for="pw">Contraseña</label><input class="inp" id="pw" type="password" autocomplete="new-password" required minlength="6">
       <div class="help">Mínimo 6 caracteres.</div>
       <label class="f" for="email">Correo electrónico <span class="muted">(opcional)</span></label><input class="inp" id="email" type="email" inputmode="email" autocomplete="email" placeholder="tucorreo@ejemplo.com">
@@ -720,7 +723,7 @@ async function admDetalle(numero) {
   modal(`<div class="cargando"><div class="spin"></div>Cargando…</div>`, "Pedido " + numero);
   let j;
   try { j = await api("verPedido", {numero}); } catch (e) { $("#modalCuerpo").innerHTML = `<div class="err">${esc(e.message)}</div>`; return; }
-  const p = j.pedido, tel = String(p.telefono).length === 9 ? "34" + p.telefono : p.telefono;
+  const p = j.pedido, tel = telWa(p.telefono);
   const acc = ACCIONES_ESTADO[p.estado] || [];
   $("#modalCuerpo").innerHTML = `<div class="stack">
     <div class="row between">${chip(p.estado)}<span class="muted">${fecha(p.fecha)}</span></div>
@@ -887,7 +890,7 @@ function admUsuarios() {
     confirmar("¿Crear contraseña nueva?", `Se generará una contraseña temporal para ${u.nombre}. Su contraseña actual dejará de funcionar.`, "Crear", async () => {
       try {
         const r = await api("resetPassword", {id: u.id});
-        const tel = String(u.telefono).length === 9 ? "34" + u.telefono : u.telefono;
+        const tel = telWa(u.telefono);
         const txt = `Hola ${u.nombre}, tu nueva contraseña para ${cat.config.negocio} es: ${r.temporal}\nCuando entres, cámbiala en «Mi cuenta».`;
         modal(`<p>Contraseña temporal de <b>${esc(u.nombre)}</b>:</p><p style="font-family:var(--head);font-size:2rem;font-weight:700;letter-spacing:3px;text-align:center">${esc(r.temporal)}</p>
           <a class="btn full" href="https://wa.me/${esc(tel)}?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">💬 Enviársela por WhatsApp</a>`, "Contraseña nueva");
@@ -951,3 +954,4 @@ if (token) api("yo", {}, {silencio: true}).then(j => setSesion(token, j.usuario)
 </script>
 </body>
 </html>
+
