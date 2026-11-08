@@ -93,6 +93,11 @@ textarea.inp{min-height:80px;resize:vertical}
 .emo{font-size:28px;height:54px;border:2px solid transparent;background:var(--bg);border-radius:14px;display:grid;place-items:center}
 .emo[aria-pressed="true"]{border-color:var(--pri);background:var(--pri-soft)}
 .emo.sin{font-size:.8rem;font-weight:800;color:var(--muted)}
+.emo svg{width:40px;height:40px}
+.emojis.grandes{grid-template-columns:repeat(3,1fr);gap:10px}
+.emojis.grandes .emo{height:auto;aspect-ratio:1;border-radius:20px}
+.emojis.grandes .emo svg{width:72%;height:auto}
+@media(min-width:600px){.emojis.grandes{grid-template-columns:repeat(6,1fr)}}
 .contador{font-size:.85rem;color:var(--muted);text-align:right;margin-top:4px}
 .stepper{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
 .stepper button{width:52px;height:52px;border:0;background:var(--pri-soft);color:var(--pri);font-size:1.5rem;font-weight:800}
@@ -179,6 +184,7 @@ textarea.inp{min-height:80px;resize:vertical}
 .emoAdmin{display:flex;flex-wrap:wrap;gap:6px}
 .emoAdmin button{font-size:24px;width:52px;height:52px;border-radius:12px;border:2px solid var(--line);background:#fff;position:relative}
 .emoAdmin button.off{opacity:.3}
+.emoAdmin button svg{width:38px;height:38px}
 .usu{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 .usu:last-child{border-bottom:0}
 
@@ -290,9 +296,60 @@ function formaSVG(forma, attrs) {
     default: return `<circle ${attrs} cx="100" cy="140" r="76"/>`;
   }
 }
+
+/* ---- Modelo «Llavero emoji»: disco blanco con agujero, cara amarilla en relieve y nombre curvado ---- */
+const NEGRO = "#1b1b1f", ROJO = "#ff4b4b", AMARILLO = "#ffc919", AMARILLO_OSC = "#e2a400";
+function corazon(cx, cy, s, fill) {
+  return `<path fill="${fill}" d="M${cx} ${cy + s * .9} C ${cx - s * 1.6} ${cy - s * .1}, ${cx - s * .9} ${cy - s * 1.25}, ${cx} ${cy - s * .45} C ${cx + s * .9} ${cy - s * 1.25}, ${cx + s * 1.6} ${cy - s * .1}, ${cx} ${cy + s * .9} Z"/>`;
+}
+function lagrima(cx, cy, fill) {
+  return `<path fill="${fill}" d="M${cx} ${cy - 14} C ${cx + 4} ${cy - 6}, ${cx + 10} ${cy}, ${cx + 10} ${cy + 6} A 10 10 0 0 1 ${cx - 10} ${cy + 6} C ${cx - 10} ${cy}, ${cx - 4} ${cy - 6}, ${cx} ${cy - 14} Z"/><ellipse cx="${cx - 3}" cy="${cy + 4}" rx="2.5" ry="4" fill="#bfe7ff"/>`;
+}
+const traz = (d, w) => `<path d="${d}" fill="none" stroke="${NEGRO}" stroke-width="${w || 4.5}" stroke-linecap="round"/>`;
+const CEJAS = traz("M73 64 Q83 57 93 61", 4) + traz("M107 61 Q117 57 127 64", 4);
+const OJOS_CERRADOS = traz("M74 88 Q84 76 94 88", 5) + traz("M106 88 Q116 76 126 88", 5);
+const BOCA_ABIERTA = `<path fill="${NEGRO}" d="M62 102 Q100 111 138 102 Q134 142 100 143 Q66 142 62 102 Z"/><path fill="${ROJO}" d="M77 129 Q100 115 123 129 Q114 142 100 143 Q86 142 77 129 Z"/>`;
+const CARAS = {
+  "😉": CEJAS + `<ellipse cx="84" cy="84" rx="6.5" ry="9.5" fill="${NEGRO}"/><circle cx="82" cy="80" r="2.2" fill="#fff"/>` + traz("M106 88 Q116 78 126 88", 5) + BOCA_ABIERTA,
+  "😍": CEJAS + corazon(81, 86, 17, ROJO) + corazon(119, 86, 17, ROJO) + BOCA_ABIERTA,
+  "😎": traz("M76 60 Q84 55 92 59", 4) + traz("M108 59 Q116 55 124 60", 4) +
+        `<path fill="${NEGRO}" d="M50 71 H150 V79 H146 Q145 103 122 104 Q104 104 103 82 H97 Q96 104 78 104 Q55 103 54 79 H50 Z"/>` + traz("M74 118 Q100 136 126 118", 7),
+  "😂": CEJAS + OJOS_CERRADOS + lagrima(64, 102, "#2fa6ff") + lagrima(136, 102, "#2fa6ff") + BOCA_ABIERTA,
+  "🤩": CEJAS + `<polygon fill="#ffe14d" stroke="#e8b400" stroke-width="2" stroke-linejoin="round" points="${estrella(81, 85, 20, 9, 5)}"/><polygon fill="#ffe14d" stroke="#e8b400" stroke-width="2" stroke-linejoin="round" points="${estrella(119, 85, 20, 9, 5)}"/>` + BOCA_ABIERTA,
+  "😄": CEJAS + OJOS_CERRADOS + BOCA_ABIERTA
+};
+const tieneCara = e => !!CARAS[e];
+/* Cara sola (para los botones del catálogo) */
+function caraSVG(e) {
+  if (!tieneCara(e)) return esc(e);
+  return `<svg viewBox="36 30 128 128" aria-hidden="true"><circle cx="100" cy="96" r="58" fill="${AMARILLO_OSC}"/><circle cx="100" cy="94" r="58" fill="${AMARILLO}"/>${CARAS[e]}</svg>`;
+}
+function svgEmoji(d, opts) {
+  opts = opts || {};
+  const emoji = d.emoji || "", texto = String(d.texto || "").toUpperCase();
+  const azul = d.hex || "#1d6fe0", azulOsc = tono(azul, -0.3);
+  const id = "a" + Math.random().toString(36).slice(2, 8);
+  const n = Math.max(1, largo(texto));
+  const fs = Math.min(29, 190 / (n * 0.74));
+  let cara = "";
+  if (tieneCara(emoji)) cara = `<circle cx="100" cy="97" r="58" fill="${AMARILLO_OSC}"/><circle cx="100" cy="94" r="58" fill="${AMARILLO}"/>${CARAS[emoji]}`;
+  else if (emoji) cara = `<text x="100" y="${texto ? 96 : 110}" font-size="${texto ? 92 : 110}" text-anchor="middle" dominant-baseline="central">${esc(emoji)}</text>`;
+  const nombre = texto ? `<defs><path id="${id}" d="M 34 150 A 70 70 0 0 0 166 150"/></defs>
+    <text font-family="Fredoka, sans-serif" font-weight="700" font-size="${fs.toFixed(1)}" letter-spacing="1.5" fill="${azulOsc}" transform="translate(0,2.2)"><textPath href="#${id}" startOffset="50%" text-anchor="middle">${esc(texto)}</textPath></text>
+    <text font-family="Fredoka, sans-serif" font-weight="700" font-size="${fs.toFixed(1)}" letter-spacing="1.5" fill="${azul}"><textPath href="#${id}" startOffset="50%" text-anchor="middle">${esc(texto)}</textPath></text>` : "";
+  const centroCara = !texto && tieneCara(emoji) ? `<g transform="translate(0,12)">${cara}</g>` : cara;
+  return `<svg viewBox="2 4 196 206" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc("Llavero " + emoji + " " + texto)}">
+    <circle cx="100" cy="110" r="94" fill="#d8d8d2"/>
+    <circle cx="100" cy="106" r="94" fill="#fbfbf8"/>
+    <circle cx="100" cy="106" r="93" fill="none" stroke="#ececE6" stroke-width="2"/>
+    <circle cx="100" cy="24" r="9" style="fill:var(--hole)" stroke="#e2e2dc" stroke-width="2"/>
+    ${centroCara}${nombre}
+  </svg>`;
+}
 const CENTRO = {corazon: 136, estrella: 150, nube: 150, rectangulo: 140, hexagono: 142, circulo: 140};
 function svgLlavero(d, opts) {
   opts = opts || {};
+  if (d.forma === "emoji") return svgEmoji(d, opts);
   const hex = d.hex || "#9b7bff", forma = d.forma || "circulo", oscuro = tono(hex, -0.28);
   const txtColor = claro(hex) ? "#2a2440" : "#ffffff";
   const id = "g" + Math.random().toString(36).slice(2, 8);
@@ -363,19 +420,21 @@ function disenoActual() {
 function vistaDisenar() {
   if (!cat.modelos.length) { app.innerHTML = `<div class="card vacio"><div class="big">🛠️</div><p>Todavía no hay modelos disponibles. ¡Vuelve pronto!</p></div>`; return; }
   const max = Number(cat.config.texto_max) || 12;
+  const unModelo = cat.modelos.length === 1, unColor = cat.colores.length === 1;
+  const esMayus = cat.modelos.some(m => m.forma === "emoji");
   app.innerHTML = `
   <div class="stack">
-    <div class="hero"><div class="em">✨</div><div><h1>Crea tu llavero</h1><p>Elige forma, color, emoji y tu nombre. ¡Lo imprimimos en 3D para ti!</p></div></div>
+    <div class="hero"><div class="em">✨</div><div><h1>Crea tu llavero</h1><p>Elige tu emoji y escribe tu nombre. ¡Lo imprimimos en 3D para ti!</p></div></div>
     <div class="disenador">
-      <div class="prevCol"><div class="prev"><span class="prevTag" id="prevTag"></span><div id="prevSvg"></div></div></div>
+      <div class="prevCol"><div class="prev"><span class="prevTag ${unModelo && unColor ? "oculto" : ""}" id="prevTag"></span><div id="prevSvg"></div></div></div>
       <div class="stack">
-        <section class="card paso"><h3><span class="nn">1</span>Forma</h3><div class="opts" id="optModelos"></div></section>
-        <section class="card paso"><h3><span class="nn">2</span>Color</h3><div class="colores" id="optColores"></div><div class="colNom" id="colNom"></div></section>
-        <section class="card paso"><h3><span class="nn">3</span>Emoji</h3><div class="emojis" id="optEmojis"></div></section>
-        <section class="card paso"><h3><span class="nn">4</span>Nombre o texto</h3>
-          <input class="inp" id="texto" maxlength="${max * 2}" placeholder="Escribe tu nombre" autocomplete="off" value="${esc(diseno.texto)}">
+        <section class="card paso ${unModelo ? "oculto" : ""}"><h3><span class="nn"></span>Forma</h3><div class="opts" id="optModelos"></div></section>
+        <section class="card paso"><h3><span class="nn"></span>Elige tu emoji</h3><div class="emojis" id="optEmojis"></div></section>
+        <section class="card paso"><h3><span class="nn"></span>Escribe tu nombre</h3>
+          <input class="inp" id="texto" maxlength="${max * 2}" placeholder="Tu nombre" autocomplete="off" autocapitalize="characters" value="${esc(diseno.texto)}" style="${esMayus ? "text-transform:uppercase;font-family:var(--head);font-size:1.3rem;letter-spacing:.06em" : ""}">
           <div class="contador" id="contador"></div></section>
-        <section class="card paso"><h3><span class="nn">5</span>Cantidad</h3>
+        <section class="card paso ${unColor ? "oculto" : ""}"><h3><span class="nn"></span>${esMayus ? "Color del nombre" : "Color"}</h3><div class="colores" id="optColores"></div><div class="colNom" id="colNom"></div></section>
+        <section class="card paso"><h3><span class="nn"></span>Cantidad</h3>
           <div class="row between"><div class="stepper"><button type="button" id="menos" aria-label="Menos">−</button><span id="cant" class="num">1</span><button type="button" id="mas" aria-label="Más">+</button></div>
           <div style="text-align:right"><div class="muted" style="font-weight:700">Precio por unidad</div><b id="pUnit" class="num" style="font-size:1.2rem"></b></div></div></section>
       </div>
@@ -384,11 +443,14 @@ function vistaDisenar() {
   $("#barra").innerHTML = `<div class="barra"><div class="in"><div class="tot"><small id="bCant"></small><b id="bTot" class="num"></b></div><button class="btn" id="anadir">🛒 Añadir al carrito</button></div></div>`;
   $("#optModelos").innerHTML = cat.modelos.map(m => `<button type="button" class="opt" data-id="${esc(m.id)}">${svgLlavero({forma: m.forma, hex: "#c9bbff"}, {sinAnilla: true})}<span>${esc(m.nombre)}</span><small>${euros(m.precio)}</small></button>`).join("");
   $("#optColores").innerHTML = cat.colores.map(c => `<button type="button" class="col" data-id="${esc(c.id)}" style="background:${esc(c.hex)};--chk:${claro(c.hex) ? "#2a2440" : "#fff"}" aria-label="${esc(c.nombre)}"></button>`).join("");
-  $("#optEmojis").innerHTML = `<button type="button" class="emo sin" data-e="">Sin emoji</button>` + cat.emojis.map(e => `<button type="button" class="emo" data-e="${esc(e.emoji)}" aria-label="${esc(e.emoji)}">${esc(e.emoji)}</button>`).join("");
+  const conCaras = cat.emojis.every(e => tieneCara(e.emoji));
+  $("#optEmojis").classList.toggle("grandes", conCaras);
+  $("#optEmojis").innerHTML = (conCaras ? "" : `<button type="button" class="emo sin" data-e="">Sin emoji</button>`) + cat.emojis.map(e => `<button type="button" class="emo" data-e="${esc(e.emoji)}" aria-label="${esc(e.emoji)}">${caraSVG(e.emoji)}</button>`).join("");
+  app.querySelectorAll(".paso:not(.oculto) .nn").forEach((n, k) => n.textContent = k + 1);
   $("#optModelos").onclick = e => { const b = e.target.closest(".opt"); if (b) { diseno.modeloId = b.dataset.id; actualizarDiseno(); } };
   $("#optColores").onclick = e => { const b = e.target.closest(".col"); if (b) { diseno.colorId = b.dataset.id; actualizarDiseno(); } };
   $("#optEmojis").onclick = e => { const b = e.target.closest(".emo"); if (b) { diseno.emoji = b.dataset.e; actualizarDiseno(); } };
-  $("#texto").oninput = e => { let v = e.target.value; if (largo(v) > max) { v = Array.from(v).slice(0, max).join(""); e.target.value = v; } diseno.texto = v; actualizarDiseno(); };
+  $("#texto").oninput = e => { let v = e.target.value; if (esMayus) v = v.toUpperCase(); if (largo(v) > max) v = Array.from(v).slice(0, max).join(""); if (v !== e.target.value) e.target.value = v; diseno.texto = v; actualizarDiseno(); };
   $("#menos").onclick = () => { diseno.cantidad = Math.max(1, diseno.cantidad - 1); actualizarDiseno(); };
   $("#mas").onclick = () => { diseno.cantidad = Math.min(Number(cat.config.pedido_max_unidades) || 50, diseno.cantidad + 1); actualizarDiseno(); };
   $("#anadir").onclick = anadirAlCarrito;
@@ -411,6 +473,7 @@ function actualizarDiseno() {
 }
 function anadirAlCarrito() {
   const d = disenoActual();
+  if (d.forma === "emoji") d.texto = String(d.texto || "").toUpperCase();
   if (!d.emoji && !d.texto.trim()) { toast("Elige un emoji o escribe un texto"); $("#texto").focus(); return; }
   const igual = carrito.find(i => i.modeloId === d.modeloId && i.colorId === d.colorId && i.emoji === d.emoji && i.texto === d.texto.trim());
   if (igual) igual.cantidad += d.cantidad;
@@ -817,8 +880,8 @@ function admCatalogo() {
           <label class="chk"><input type="checkbox" data-c="${k}" data-k="activo" ${x.activo ? "checked" : ""}>Activo</label>
           <button class="x" data-xc="${k}" aria-label="Borrar">✕</button></div>`).join("")}</div>
         <button class="btn sec sm" id="addC" style="margin-top:10px">＋ Añadir color</button></section>
-      <section class="card"><h3>Emojis</h3><p class="help">Toca un emoji para activarlo o desactivarlo (los apagados no se muestran a los clientes). Mantén pulsado para borrarlo.</p>
-        <div class="emoAdmin">${c.emojis.map((e, k) => `<button class="${e.activo ? "" : "off"}" data-e="${k}" aria-pressed="${e.activo}">${esc(e.emoji)}</button>`).join("")}</div>
+      <section class="card"><h3>Emojis</h3><p class="help">Toca un emoji para activarlo o desactivarlo (los apagados no se muestran a los clientes). Mantén pulsado para borrarlo. Los diseños 😉 😍 😎 😂 🤩 😄 se dibujan como vuestros llaveros; cualquier otro emoji se muestra tal cual.</p>
+        <div class="emoAdmin">${c.emojis.map((e, k) => `<button class="${e.activo ? "" : "off"}" data-e="${k}" aria-pressed="${e.activo}">${tieneCara(e.emoji) ? caraSVG(e.emoji) : esc(e.emoji)}</button>`).join("")}</div>
         <div class="row" style="margin-top:10px"><input class="inp" id="nuevosE" placeholder="Pega aquí emojis nuevos: 🐙🦖🎃" style="flex:1"><button class="btn sm" id="addE">Añadir</button></div></section>
       <div id="msgC"></div>
       <button class="btn full" id="guardarC">💾 Guardar catálogo</button></div>`;
@@ -954,4 +1017,3 @@ if (token) api("yo", {}, {silencio: true}).then(j => setSesion(token, j.usuario)
 </script>
 </body>
 </html>
-
