@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6c4cff">
+<title>Llaveros 3D</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔑</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f3ff; --card:#ffffff; --ink:#1f1b2e; --muted:#6b6580; --line:#e6e0f5;
+  --pri:#6c4cff; --pri-ink:#fff; --pri-soft:#ece6ff; --acc:#ffb020; --ok:#16a37f; --ok-soft:#dff6ee;
+  --warn:#e8890c; --warn-soft:#fff1dc; --bad:#d93a3a; --bad-soft:#fde6e6; --info:#2f80ed; --info-soft:#e3efff;
+  --hole:var(--card); --r:18px; --sh:0 6px 24px rgba(60,40,140,.08);
+  --head:'Fredoka',system-ui,sans-serif; --body:'Nunito',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;min-height:100vh}
+h1,h2,h3{font-family:var(--head);font-weight:600;line-height:1.15;margin:0}
+h1{font-size:1.7rem} h2{font-size:1.3rem} h3{font-size:1.08rem}
+a{color:var(--pri)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+.oculto{display:none!important}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+/* Cabecera */
+header.top{position:sticky;top:0;z-index:30;background:rgba(246,243,255,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topin{max-width:1040px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-family:var(--head);font-weight:700;font-size:1.25rem;margin-right:auto;min-width:0}
+.logo span.n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logo .ic{width:36px;height:36px;border-radius:12px;background:var(--pri);display:grid;place-items:center;font-size:20px;flex:none}
+.tb{position:relative;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:8px 13px;font-weight:700;text-decoration:none;color:var(--ink);min-height:42px;white-space:nowrap}
+.tb .badge{position:absolute;top:-6px;right:-6px;background:var(--acc);color:#2b1d00;border-radius:999px;min-width:22px;height:22px;font-size:.78rem;display:grid;place-items:center;padding:0 6px;font-weight:800}
+.tb.adm{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+main{max-width:1040px;margin:0 auto;padding:18px 16px 120px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:18px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* Botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:16px;padding:14px 20px;font-weight:800;font-size:1.05rem;min-height:54px;background:var(--pri);color:var(--pri-ink);text-decoration:none;transition:transform .08s, filter .15s}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.full{width:100%}
+.btn.sec{background:var(--pri-soft);color:var(--pri)}
+.btn.lin{background:var(--card);color:var(--ink);border:1.5px solid var(--line)}
+.btn.ok{background:var(--ok)} .btn.bad{background:var(--bad)} .btn.warn{background:var(--warn)}
+.btn.sm{min-height:40px;padding:8px 14px;font-size:.92rem;border-radius:12px}
+.lnk{border:0;background:none;color:var(--pri);font-weight:700;padding:6px 0;text-decoration:underline}
+
+/* Formularios */
+label.f{display:block;font-weight:700;font-size:.92rem;margin:12px 0 6px}
+.inp{width:100%;border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:13px 14px;font-size:1.05rem;min-height:52px}
+.inp:focus{border-color:var(--pri);outline:none;box-shadow:0 0 0 4px var(--pri-soft)}
+textarea.inp{min-height:80px;resize:vertical}
+.help{font-size:.85rem;color:var(--muted);margin-top:4px}
+.err{background:var(--bad-soft);color:#8a1c1c;border-radius:12px;padding:10px 12px;font-weight:600;margin-top:10px}
+.okmsg{background:var(--ok-soft);color:#0b5b45;border-radius:12px;padding:10px 12px;font-weight:600;margin-top:10px}
+.tabs{display:flex;background:var(--pri-soft);border-radius:14px;padding:4px;gap:4px}
+.tabs button{flex:1;border:0;background:none;border-radius:11px;padding:10px;font-weight:800;color:var(--pri)}
+.tabs button[aria-selected="true"]{background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.08);color:var(--ink)}
+
+/* Diseñador */
+.disenador{display:grid;gap:18px}
+@media(min-width:860px){.disenador{grid-template-columns:400px 1fr;align-items:start}.prevCol{position:sticky;top:78px}}
+.prev{background:radial-gradient(circle at 50% 35%,#fff 0,#f1ecff 70%);border-radius:24px;border:1px solid var(--line);display:grid;place-items:center;padding:10px;position:relative}
+.prev svg{width:100%;max-width:300px;height:auto;filter:drop-shadow(0 14px 18px rgba(50,30,120,.18))}
+@media(max-width:859px){.prevCol{position:sticky;top:61px;z-index:5}.prev{padding:4px;box-shadow:0 8px 20px rgba(60,40,140,.12)}.prev svg{max-width:150px}}
+.prevTag{position:absolute;left:12px;top:12px;background:var(--card);border-radius:999px;padding:4px 10px;font-size:.8rem;font-weight:800;color:var(--pri);border:1px solid var(--line)}
+.paso h3{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.paso h3 .nn{width:28px;height:28px;border-radius:50%;background:var(--pri);color:#fff;display:grid;place-items:center;font-size:.9rem;flex:none}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+.opt{border:2px solid var(--line);background:var(--card);border-radius:16px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:700;min-height:96px}
+.opt svg{width:52px;height:52px}
+.opt small{color:var(--muted);font-weight:700}
+.opt[aria-pressed="true"]{border-color:var(--pri);background:var(--pri-soft)}
+.colores{display:flex;flex-wrap:wrap;gap:10px}
+.col{width:48px;height:48px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px var(--line);position:relative}
+.col[aria-pressed="true"]{box-shadow:0 0 0 3px var(--pri)}
+.col[aria-pressed="true"]::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;font-weight:900;color:var(--chk,#fff);font-size:1.2rem}
+.colNom{font-weight:700;margin-top:8px;color:var(--muted)}
+.emojis{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:8px}
+.emo{font-size:28px;height:54px;border:2px solid transparent;background:var(--bg);border-radius:14px;display:grid;place-items:center}
+.emo[aria-pressed="true"]{border-color:var(--pri);background:var(--pri-soft)}
+.emo.sin{font-size:.8rem;font-weight:800;color:var(--muted)}
+.contador{font-size:.85rem;color:var(--muted);text-align:right;margin-top:4px}
+.stepper{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
+.stepper button{width:52px;height:52px;border:0;background:var(--pri-soft);color:var(--pri);font-size:1.5rem;font-weight:800}
+.stepper span{min-width:56px;text-align:center;font-weight:800;font-size:1.2rem}
+.barra{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(40,20,100,.08);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+.barra .in{max-width:1040px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.barra .tot{margin-right:auto;line-height:1.2}
+.barra .tot b{font-family:var(--head);font-size:1.5rem}
+.barra .tot small{display:block;color:var(--muted);font-weight:700}
+
+/* Listas y estados */
+.item{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.item svg{width:72px;height:auto}
+.item .t{font-weight:800}
+.item .d{font-size:.88rem;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 11px;font-size:.82rem;font-weight:800;white-space:nowrap}
+.e-pendiente_pago{background:var(--warn-soft);color:#8a4d00}
+.e-pendiente_verificacion{background:#fff6c9;color:#7a5b00}
+.e-confirmado{background:var(--info-soft);color:#14529e}
+.e-fabricacion{background:var(--pri-soft);color:#4b2fd1}
+.e-listo{background:var(--ok-soft);color:#0b6b50}
+.e-entregado{background:#eceaf2;color:#4d475f}
+.e-cancelado{background:var(--bad-soft);color:#9b1c1c}
+.pedidoCard{display:block;text-decoration:none;color:inherit;cursor:pointer;text-align:left;width:100%;font:inherit}
+.pedidoCard:hover{border-color:var(--pri)}
+.miniPrev{display:flex;gap:4px;margin-top:8px}
+.miniPrev svg{width:42px;height:auto}
+.linea{display:flex;flex-direction:column;gap:0;margin:6px 0 0;padding:0;list-style:none}
+.linea li{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;position:relative;padding-bottom:14px}
+.linea li::before{content:"";position:absolute;left:14px;top:28px;bottom:0;width:2px;background:var(--line)}
+.linea li:last-child::before{display:none}
+.linea .p{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:#fff;display:grid;place-items:center;font-size:.85rem;font-weight:900;color:var(--muted);z-index:1}
+.linea li.hecho .p{background:var(--ok);border-color:var(--ok);color:#fff}
+.linea li.actual .p{background:var(--pri);border-color:var(--pri);color:#fff;box-shadow:0 0 0 5px var(--pri-soft)}
+.linea li.actual b{color:var(--pri)}
+.linea .tx{padding-top:4px}
+.pago{background:linear-gradient(135deg,#00c2b8,#16a37f);color:#fff;border-radius:22px;padding:18px}
+.pago h2{color:#fff}
+.pago .imp{font-family:var(--head);font-size:2.4rem;font-weight:700;line-height:1;margin:6px 0 12px}
+.pago .dato{background:rgba(255,255,255,.16);border-radius:14px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+.pago .dato small{display:block;opacity:.85;font-weight:700}
+.pago .dato b{font-size:1.15rem;word-break:break-all}
+.pago .copiar{border:0;background:#fff;color:#0b6b50;border-radius:10px;padding:8px 12px;font-weight:800;flex:none}
+.pago ol{margin:14px 0 0;padding-left:20px}
+.pago ol li{margin-bottom:4px}
+.aviso{background:var(--warn-soft);border-radius:14px;padding:12px 14px;font-weight:600;color:#6b3d00}
+.vacio{text-align:center;padding:30px 10px;color:var(--muted)}
+.vacio .big{font-size:3rem}
+.hero{background:linear-gradient(135deg,var(--pri),#a46bff);color:#fff;border-radius:24px;padding:20px;display:flex;align-items:center;gap:14px}
+.hero h1{color:#fff;font-size:1.55rem}
+.hero p{margin:4px 0 0;opacity:.92;font-weight:600}
+.hero .em{font-size:44px}
+
+/* Admin */
+.atabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.atabs::-webkit-scrollbar{display:none}
+.atabs button{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:9px 15px;font-weight:800;white-space:nowrap;min-height:42px}
+.atabs button[aria-selected="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.filtros{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.filtros .inp{min-height:44px;padding:9px 12px;font-size:.95rem}
+.estChips{display:flex;gap:6px;flex-wrap:wrap}
+.estChips button{border:0;cursor:pointer}
+.estChips button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.kpi small{display:block;font-weight:800;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+.kpi b{font-family:var(--head);font-size:1.6rem}
+.kpi.verde b{color:var(--ok)} .kpi.nar b{color:var(--warn)}
+.barras{display:flex;flex-direction:column;gap:8px}
+.barras .b{display:grid;grid-template-columns:minmax(80px,140px) 1fr auto;gap:10px;align-items:center;font-size:.92rem;font-weight:700}
+.barras .tr{background:var(--pri-soft);border-radius:999px;height:12px;overflow:hidden}
+.barras .fi{background:var(--pri);height:100%;border-radius:999px}
+.tabla{display:flex;flex-direction:column;gap:8px}
+.fila{display:grid;gap:8px;align-items:center;background:var(--bg);border-radius:14px;padding:10px}
+.fila .inp{min-height:44px;padding:8px 10px;font-size:.95rem}
+.fila.mod{grid-template-columns:44px 1.3fr 1fr 90px auto auto}
+.fila.colr{grid-template-columns:52px 1fr auto auto}
+.fila.pto{grid-template-columns:1fr auto auto}
+@media(max-width:640px){.fila.mod{grid-template-columns:44px 1fr 1fr;}.fila.mod .precio{grid-column:2}.fila.pto{grid-template-columns:1fr auto}}
+.chk{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.9rem;white-space:nowrap}
+.chk input{width:20px;height:20px;accent-color:var(--pri)}
+.x{border:0;background:var(--bad-soft);color:var(--bad);border-radius:10px;width:40px;height:40px;font-weight:900;font-size:1.1rem}
+.emoAdmin{display:flex;flex-wrap:wrap;gap:6px}
+.emoAdmin button{font-size:24px;width:52px;height:52px;border-radius:12px;border:2px solid var(--line);background:#fff;position:relative}
+.emoAdmin button.off{opacity:.3}
+.usu{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.usu:last-child{border-bottom:0}
+
+/* Ventana */
+.modal{position:fixed;inset:0;z-index:50;background:rgba(25,18,50,.55);display:flex;align-items:flex-end;justify-content:center}
+@media(min-width:700px){.modal{align-items:center}}
+.modal .caja{background:var(--bg);width:100%;max-width:640px;max-height:94vh;overflow:auto;border-radius:24px 24px 0 0;padding:18px 16px calc(24px + env(safe-area-inset-bottom))}
+@media(min-width:700px){.modal .caja{border-radius:24px}}
+.modal .cab{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;position:sticky;top:-18px;background:var(--bg);padding:6px 0;z-index:2}
+.cerrar{border:0;background:var(--card);border-radius:50%;width:44px;height:44px;font-size:1.5rem;box-shadow:var(--sh);flex:none}
+.justif img{max-width:100%;border-radius:14px;display:block;margin:auto}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:999px;font-weight:800;z-index:60;max-width:92vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.cargando{display:flex;align-items:center;justify-content:center;gap:10px;padding:40px;color:var(--muted);font-weight:700}
+.spin{width:22px;height:22px;border:3px solid var(--pri-soft);border-top-color:var(--pri);border-radius:50%;animation:g .8s linear infinite}
+@keyframes g{to{transform:rotate(360deg)}}
+.qr{background:#fff;padding:12px;border-radius:14px;display:inline-block}
+</style>
+</head>
+<body>
+<header class="top"><div class="topin">
+  <a class="logo" href="#/"><span class="ic">🔑</span><span class="n" id="negocio">Llaveros 3D</span></a>
+  <a class="tb adm oculto" id="tbAdmin" href="#/admin">⚙️ Panel</a>
+  <a class="tb" id="tbPedidos" href="#/pedidos">📦<span class="oculto" id="tbPedTxt"> Pedidos</span></a>
+  <a class="tb" href="#/carrito" aria-label="Carrito">🛒<span class="badge oculto" id="tbCount">0</span></a>
+  <a class="tb" id="tbCuenta" href="#/entrar">👤 <span id="tbCuentaTxt">Entrar</span></a>
+</div></header>
+
+<main id="app"><div class="cargando"><div class="spin"></div>Cargando…</div></main>
+<div id="barra"></div>
+<div id="modales"></div>
+
+<script>
+/* =====================================================================
+   CONFIGURACIÓN: pega aquí la URL de tu Apps Script (termina en /exec)
+   ===================================================================== */
+const API_URL = "https://script.google.com/macros/s/AKfycbxeR8b95va92mxshvK6vq_-4APA47A6Q3jfXnEle6isUBDDf8mqLRa-oSz1PjrFl4rb/exec";
+
+/* ===================== Utilidades ===================== */
+const $ = s => document.querySelector(s);
+const app = $("#app");
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const euros = n => (Math.round(Number(n || 0) * 100) / 100).toLocaleString("es-ES", {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+const leer = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
+const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const borrar = k => { try { localStorage.removeItem(k); } catch (e) {} };
+const largo = s => Array.from(s || "").length;
+function toast(t, ms) { const d = document.createElement("div"); d.className = "toast"; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), ms || 2600); }
+function fecha(f) { if (!f) return ""; const [d, h] = String(f).split(" "); const p = d.split("-"); return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}${h ? " " + h : ""}` : f; }
+function cargando(t) { app.innerHTML = `<div class="cargando"><div class="spin"></div>${esc(t || "Cargando…")}</div>`; }
+function ir(h) { if (location.hash === h) render(); else location.hash = h; }
+
+/* ===================== Estado ===================== */
+let token = leer("ll_token", null), usuario = leer("ll_user", null), carrito = leer("ll_cart", []);
+let cat = null; // catálogo público
+let diseno = leer("ll_diseno", null);
+let adm = null, admTab = "pedidos", admFiltro = {estado: "", punto: "", desde: "", hasta: "", q: ""};
+
+async function api(accion, datos, opts) {
+  if (!API_URL || API_URL.indexOf("http") !== 0) throw new Error("La web aún no está conectada: falta pegar la URL de Apps Script en index.html");
+  const body = Object.assign({accion}, datos || {});
+  if (token) body.token = token;
+  let r;
+  try {
+    r = await fetch(API_URL, {method: "POST", headers: {"Content-Type": "text/plain;charset=utf-8"}, body: JSON.stringify(body)});
+  } catch (e) { throw new Error("Sin conexión. Revisa internet e inténtalo de nuevo."); }
+  let j;
+  try { j = await r.json(); } catch (e) { throw new Error("El servidor no responde bien. Inténtalo en un momento."); }
+  if (!j.ok) {
+    if (j.sesion === false) { setSesion(null, null); if (!(opts && opts.silencio)) { toast("Tu sesión ha caducado. Vuelve a entrar."); ir("#/entrar"); } }
+    throw new Error(j.error || "Ha ocurrido un error");
+  }
+  return j;
+}
+
+function setSesion(t, u) {
+  if (t !== token) { adm = null; admTab = "pedidos"; }
+  token = t; usuario = u;
+  if (t) { guardar("ll_token", t); guardar("ll_user", u); } else { borrar("ll_token"); borrar("ll_user"); }
+  pintarCabecera();
+}
+function guardarCarrito() { guardar("ll_cart", carrito); pintarCabecera(); }
+function pintarCabecera() {
+  const n = carrito.reduce((s, i) => s + i.cantidad, 0);
+  $("#tbCount").textContent = n; $("#tbCount").classList.toggle("oculto", !n);
+  $("#tbCuentaTxt").textContent = usuario ? usuario.nombre.split(" ")[0] : "Entrar";
+  $("#tbCuenta").href = usuario ? "#/cuenta" : "#/entrar";
+  $("#tbPedidos").classList.toggle("oculto", !usuario);
+  $("#tbAdmin").classList.toggle("oculto", !(usuario && usuario.rol === "admin"));
+  if (cat) { $("#negocio").textContent = cat.config.negocio; document.title = cat.config.negocio; }
+}
+
+/* ===================== Dibujo del llavero (SVG) ===================== */
+function tono(hex, f) {
+  let n = parseInt(String(hex || "#888888").slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  const m = v => Math.max(0, Math.min(255, Math.round(f < 0 ? v * (1 + f) : v + (255 - v) * f)));
+  return "#" + [m(r), m(g), m(b)].map(v => v.toString(16).padStart(2, "0")).join("");
+}
+function claro(hex) { const n = parseInt(String(hex || "#888888").slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255 > 0.62; }
+function estrella(cx, cy, R, r, p) { const pts = []; for (let i = 0; i < p * 2; i++) { const a = Math.PI / p * i - Math.PI / 2, rr = i % 2 ? r : R; pts.push((cx + rr * Math.cos(a)).toFixed(1) + "," + (cy + rr * Math.sin(a)).toFixed(1)); } return pts.join(" "); }
+function formaSVG(forma, attrs) {
+  switch (forma) {
+    case "corazon": return `<path ${attrs} d="M100 214 C 52 178, 22 146, 24 110 C 26 80, 50 66, 72 68 C 88 70, 97 80, 100 90 C 103 80, 112 70, 128 68 C 150 66, 174 80, 176 110 C 178 146, 148 178, 100 214 Z"/>`;
+    case "rectangulo": return `<rect ${attrs} x="28" y="72" width="144" height="136" rx="26"/>`;
+    case "estrella": return `<polygon ${attrs} points="${estrella(100, 146, 86, 44, 5)}" stroke-linejoin="round" stroke-width="10"/>`;
+    case "hexagono": return `<polygon ${attrs} points="${estrella(100, 142, 78, 78, 3)}" stroke-linejoin="round" stroke-width="10"/>`;
+    case "nube": return `<g ${attrs}><circle cx="70" cy="150" r="42"/><circle cx="108" cy="122" r="52"/><circle cx="142" cy="156" r="38"/><rect x="62" y="150" width="88" height="44" rx="22"/></g>`;
+    default: return `<circle ${attrs} cx="100" cy="140" r="76"/>`;
+  }
+}
+const CENTRO = {corazon: 136, estrella: 150, nube: 150, rectangulo: 140, hexagono: 142, circulo: 140};
+function svgLlavero(d, opts) {
+  opts = opts || {};
+  const hex = d.hex || "#9b7bff", forma = d.forma || "circulo", oscuro = tono(hex, -0.28);
+  const txtColor = claro(hex) ? "#2a2440" : "#ffffff";
+  const id = "g" + Math.random().toString(36).slice(2, 8);
+  const cy = CENTRO[forma] || 140;
+  const texto = d.texto || "", emoji = d.emoji || "";
+  const n = Math.max(1, largo(texto));
+  const ancho = forma === "estrella" ? 110 : forma === "corazon" ? 130 : 140;
+  let contenido = "";
+  if (emoji && texto) {
+    const fs = Math.min(30, ancho / (n * 0.6));
+    contenido = `<text x="100" y="${cy - 14}" font-size="${forma === "estrella" ? 44 : 56}" text-anchor="middle" dominant-baseline="central">${esc(emoji)}</text>
+      <text x="100" y="${cy + 38}" font-size="${fs.toFixed(1)}" text-anchor="middle" dominant-baseline="central" fill="${txtColor}" font-family="Fredoka, sans-serif" font-weight="700">${esc(texto)}</text>`;
+  } else if (emoji) {
+    contenido = `<text x="100" y="${cy + 2}" font-size="${forma === "estrella" ? 60 : 84}" text-anchor="middle" dominant-baseline="central">${esc(emoji)}</text>`;
+  } else if (texto) {
+    const fs = Math.min(46, ancho / (n * 0.58));
+    contenido = `<text x="100" y="${cy}" font-size="${fs.toFixed(1)}" text-anchor="middle" dominant-baseline="central" fill="${txtColor}" font-family="Fredoka, sans-serif" font-weight="700">${esc(texto)}</text>`;
+  }
+  const anilla = opts.sinAnilla ? "" : `<circle cx="100" cy="30" r="24" fill="none" stroke="#b8b6c6" stroke-width="6"/><circle cx="100" cy="30" r="24" fill="none" stroke="#e9e8f0" stroke-width="2" stroke-dasharray="20 30"/>`;
+  return `<svg viewBox="0 ${opts.sinAnilla ? 40 : 0} 200 ${opts.sinAnilla ? 190 : 232}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc((d.modelo || "Llavero") + " " + (d.color || "") + " " + emoji + " " + texto)}">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+    <g transform="translate(0,8)"><circle cx="100" cy="62" r="18" fill="${oscuro}"/>${formaSVG(forma, `fill="${oscuro}" stroke="${oscuro}"`)}</g>
+    <circle cx="100" cy="62" r="18" fill="${hex}"/>
+    ${formaSVG(forma, `fill="${hex}" stroke="${hex}"`)}
+    ${formaSVG(forma, `fill="url(#${id})" stroke="none"`)}
+    <circle cx="100" cy="58" r="7" style="fill:var(--hole)"/>
+    ${anilla}
+    ${contenido}
+  </svg>`;
+}
+
+/* ===================== Arranque y rutas ===================== */
+async function cargarCatalogo() {
+  const j = await api("catalogo");
+  cat = j; pintarCabecera();
+  if (!diseno || !cat.modelos.some(m => m.id === diseno.modeloId)) {
+    diseno = {modeloId: cat.modelos[0] && cat.modelos[0].id, colorId: (cat.colores[4] || cat.colores[0] || {}).id, emoji: (cat.emojis[0] || {}).emoji || "", texto: "", cantidad: 1};
+  }
+  if (!cat.colores.some(c => c.id === diseno.colorId)) diseno.colorId = (cat.colores[0] || {}).id;
+}
+
+window.addEventListener("hashchange", render);
+async function render() {
+  $("#barra").innerHTML = ""; window.scrollTo(0, 0);
+  const h = location.hash || "#/";
+  const [ruta, arg] = h.replace(/^#\//, "").split("/");
+  try {
+    if (!cat) { cargando(); await cargarCatalogo(); }
+    if (ruta === "" || ruta === "disenar") return vistaDisenar();
+    if (ruta === "carrito") return vistaCarrito();
+    if (ruta === "entrar") return vistaEntrar(arg);
+    if (!usuario) { sessionStorage.setItem("ll_volver", h); return ir("#/entrar"); }
+    if (ruta === "pedidos") return vistaPedidos();
+    if (ruta === "pedido") return vistaPedido(decodeURIComponent(arg || ""));
+    if (ruta === "cuenta") return vistaCuenta();
+    if (ruta === "admin") { if (usuario.rol !== "admin") return ir("#/"); adm = null; return vistaAdmin(); }
+    ir("#/");
+  } catch (e) {
+    app.innerHTML = `<div class="card vacio"><div class="big">😕</div><p><b>${esc(e.message)}</b></p><button class="btn sec" onclick="cat=null;render()">Reintentar</button></div>`;
+  }
+}
+
+/* ===================== Diseñar llavero ===================== */
+function disenoActual() {
+  const m = cat.modelos.find(x => x.id === diseno.modeloId) || {}, c = cat.colores.find(x => x.id === diseno.colorId) || {};
+  return {modeloId: m.id, modelo: m.nombre, forma: m.forma, precio: m.precio, colorId: c.id, color: c.nombre, hex: c.hex, emoji: diseno.emoji, texto: diseno.texto, cantidad: diseno.cantidad};
+}
+function vistaDisenar() {
+  if (!cat.modelos.length) { app.innerHTML = `<div class="card vacio"><div class="big">🛠️</div><p>Todavía no hay modelos disponibles. ¡Vuelve pronto!</p></div>`; return; }
+  const max = Number(cat.config.texto_max) || 12;
+  app.innerHTML = `
+  <div class="stack">
+    <div class="hero"><div class="em">✨</div><div><h1>Crea tu llavero</h1><p>Elige forma, color, emoji y tu nombre. ¡Lo imprimimos en 3D para ti!</p></div></div>
+    <div class="disenador">
+      <div class="prevCol"><div class="prev"><span class="prevTag" id="prevTag"></span><div id="prevSvg"></div></div></div>
+      <div class="stack">
+        <section class="card paso"><h3><span class="nn">1</span>Forma</h3><div class="opts" id="optModelos"></div></section>
+        <section class="card paso"><h3><span class="nn">2</span>Color</h3><div class="colores" id="optColores"></div><div class="colNom" id="colNom"></div></section>
+        <section class="card paso"><h3><span class="nn">3</span>Emoji</h3><div class="emojis" id="optEmojis"></div></section>
+        <section class="card paso"><h3><span class="nn">4</span>Nombre o texto</h3>
+          <input class="inp" id="texto" maxlength="${max * 2}" placeholder="Escribe tu nombre" autocomplete="off" value="${esc(diseno.texto)}">
+          <div class="contador" id="contador"></div></section>
+        <section class="card paso"><h3><span class="nn">5</span>Cantidad</h3>
+          <div class="row between"><div class="stepper"><button type="button" id="menos" aria-label="Menos">−</button><span id="cant" class="num">1</span><button type="button" id="mas" aria-label="Más">+</button></div>
+          <div style="text-align:right"><div class="muted" style="font-weight:700">Precio por unidad</div><b id="pUnit" class="num" style="font-size:1.2rem"></b></div></div></section>
+      </div>
+    </div>
+  </div>`;
+  $("#barra").innerHTML = `<div class="barra"><div class="in"><div class="tot"><small id="bCant"></small><b id="bTot" class="num"></b></div><button class="btn" id="anadir">🛒 Añadir al carrito</button></div></div>`;
+  $("#optModelos").innerHTML = cat.modelos.map(m => `<button type="button" class="opt" data-id="${esc(m.id)}">${svgLlavero({forma: m.forma, hex: "#c9bbff"}, {sinAnilla: true})}<span>${esc(m.nombre)}</span><small>${euros(m.precio)}</small></button>`).join("");
+  $("#optColores").innerHTML = cat.colores.map(c => `<button type="button" class="col" data-id="${esc(c.id)}" style="background:${esc(c.hex)};--chk:${claro(c.hex) ? "#2a2440" : "#fff"}" aria-label="${esc(c.nombre)}"></button>`).join("");
+  $("#optEmojis").innerHTML = `<button type="button" class="emo sin" data-e="">Sin emoji</button>` + cat.emojis.map(e => `<button type="button" class="emo" data-e="${esc(e.emoji)}" aria-label="${esc(e.emoji)}">${esc(e.emoji)}</button>`).join("");
+  $("#optModelos").onclick = e => { const b = e.target.closest(".opt"); if (b) { diseno.modeloId = b.dataset.id; actualizarDiseno(); } };
+  $("#optColores").onclick = e => { const b = e.target.closest(".col"); if (b) { diseno.colorId = b.dataset.id; actualizarDiseno(); } };
+  $("#optEmojis").onclick = e => { const b = e.target.closest(".emo"); if (b) { diseno.emoji = b.dataset.e; actualizarDiseno(); } };
+  $("#texto").oninput = e => { let v = e.target.value; if (largo(v) > max) { v = Array.from(v).slice(0, max).join(""); e.target.value = v; } diseno.texto = v; actualizarDiseno(); };
+  $("#menos").onclick = () => { diseno.cantidad = Math.max(1, diseno.cantidad - 1); actualizarDiseno(); };
+  $("#mas").onclick = () => { diseno.cantidad = Math.min(Number(cat.config.pedido_max_unidades) || 50, diseno.cantidad + 1); actualizarDiseno(); };
+  $("#anadir").onclick = anadirAlCarrito;
+  actualizarDiseno();
+}
+function actualizarDiseno() {
+  const d = disenoActual(), max = Number(cat.config.texto_max) || 12;
+  $("#prevSvg").innerHTML = svgLlavero(d);
+  $("#prevTag").textContent = `${d.modelo || ""} · ${d.color || ""}`;
+  document.querySelectorAll("#optModelos .opt").forEach(b => b.setAttribute("aria-pressed", b.dataset.id === d.modeloId));
+  document.querySelectorAll("#optColores .col").forEach(b => b.setAttribute("aria-pressed", b.dataset.id === d.colorId));
+  document.querySelectorAll("#optEmojis .emo").forEach(b => b.setAttribute("aria-pressed", b.dataset.e === (d.emoji || "")));
+  $("#colNom").textContent = d.color || "";
+  $("#contador").textContent = `${largo(d.texto)} / ${max} letras`;
+  $("#cant").textContent = d.cantidad;
+  $("#pUnit").textContent = euros(d.precio);
+  $("#bCant").textContent = `${d.cantidad} × ${euros(d.precio)}`;
+  $("#bTot").textContent = euros(d.precio * d.cantidad);
+  guardar("ll_diseno", diseno);
+}
+function anadirAlCarrito() {
+  const d = disenoActual();
+  if (!d.emoji && !d.texto.trim()) { toast("Elige un emoji o escribe un texto"); $("#texto").focus(); return; }
+  const igual = carrito.find(i => i.modeloId === d.modeloId && i.colorId === d.colorId && i.emoji === d.emoji && i.texto === d.texto.trim());
+  if (igual) igual.cantidad += d.cantidad;
+  else carrito.push({modeloId: d.modeloId, colorId: d.colorId, emoji: d.emoji, texto: d.texto.trim(), cantidad: d.cantidad});
+  guardarCarrito();
+  diseno.texto = ""; diseno.cantidad = 1; guardar("ll_diseno", diseno);
+  modal(`<div class="stack" style="text-align:center"><div style="max-width:160px;margin:auto">${svgLlavero(d)}</div><h2>¡Añadido al carrito! 🎉</h2>
+    <button class="btn full" onclick="cerrarModal();ir('#/carrito')">Ver carrito y pedir</button>
+    <button class="btn sec full" onclick="cerrarModal();render()">Diseñar otro llavero</button></div>`, "");
+}
+
+/* ===================== Carrito ===================== */
+function itemDeCarrito(i) {
+  const m = cat.modelos.find(x => x.id === i.modeloId), c = cat.colores.find(x => x.id === i.colorId);
+  const okEmoji = !i.emoji || cat.emojis.some(e => e.emoji === i.emoji);
+  if (!m || !c || !okEmoji) return null;
+  return {modelo: m.nombre, forma: m.forma, precio: m.precio, color: c.nombre, hex: c.hex, emoji: i.emoji, texto: i.texto, cantidad: i.cantidad};
+}
+function vistaCarrito() {
+  if (!carrito.length) {
+    app.innerHTML = `<div class="card vacio"><div class="big">🛒</div><h2>Tu carrito está vacío</h2><p>Diseña tu primer llavero en un momento.</p><a class="btn" href="#/">✨ Crear llavero</a></div>`; return;
+  }
+  const quitados = carrito.filter(i => !itemDeCarrito(i)).length;
+  if (quitados) { carrito = carrito.filter(i => itemDeCarrito(i)); guardarCarrito(); }
+  const total = carrito.reduce((s, i) => s + itemDeCarrito(i).precio * i.cantidad, 0);
+  const puntoSel = leer("ll_punto", "");
+  app.innerHTML = `<div class="stack">
+    <h1>Tu carrito</h1>
+    ${quitados ? `<div class="aviso">Hemos quitado ${quitados} diseño(s) que ya no están disponibles.</div>` : ""}
+    <section class="card">${carrito.map((i, k) => { const d = itemDeCarrito(i); return `
+      <div class="item">${svgLlavero(d)}
+        <div><div class="t">${esc(d.emoji)} ${esc(d.texto || "(sin texto)")}</div><div class="d">${esc(d.modelo)} · ${esc(d.color)} · ${euros(d.precio)}/ud</div>
+          <div class="row" style="margin-top:8px"><div class="stepper" style="transform:scale(.82);transform-origin:left"><button type="button" data-k="${k}" data-d="-1" aria-label="Menos">−</button><span class="num">${i.cantidad}</span><button type="button" data-k="${k}" data-d="1" aria-label="Más">+</button></div></div></div>
+        <div style="text-align:right"><b class="num">${euros(d.precio * i.cantidad)}</b><br><button class="lnk" data-q="${k}" style="color:var(--bad)">Quitar</button></div>
+      </div>`; }).join("")}
+      <a class="btn sec full" href="#/" style="margin-top:12px">＋ Añadir otro llavero</a>
+    </section>
+    <section class="card"><h3 style="margin-bottom:10px">📍 Punto de entrega</h3>
+      ${cat.puntos.length ? cat.puntos.map(p => `<label class="row" style="border:2px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px;align-items:flex-start;cursor:pointer">
+        <input type="radio" name="punto" value="${esc(p.id)}" ${p.id === puntoSel || cat.puntos.length === 1 ? "checked" : ""} style="width:22px;height:22px;accent-color:var(--pri);margin-top:2px">
+        <span><b>${esc(p.nombre)}</b>${p.direccion ? `<br><span class="muted">${esc(p.direccion)}</span>` : ""}${p.horario ? `<br><span class="muted">🕒 ${esc(p.horario)}</span>` : ""}</span></label>`).join("") : `<p class="muted">Aún no hay puntos de entrega configurados.</p>`}
+      <label class="f" for="nota">Nota para nosotros (opcional)</label>
+      <textarea class="inp" id="nota" maxlength="300" placeholder="Ej.: es un regalo, ¿podéis envolverlo?"></textarea>
+    </section>
+    <section class="card"><div class="row between"><b>Total</b><b class="num" style="font-family:var(--head);font-size:1.6rem">${euros(total)}</b></div>
+      <p class="help">Pagarás por Bizum después de confirmar. Empezamos a fabricar cuando comprobamos el pago.</p>
+      <div id="errCarrito"></div>
+      <button class="btn full" id="confirmar" style="margin-top:8px">${usuario ? "✅ Confirmar pedido" : "👤 Entrar para confirmar el pedido"}</button></section>
+  </div>`;
+  app.querySelectorAll("[data-d]").forEach(b => b.onclick = () => { const i = carrito[b.dataset.k]; i.cantidad = Math.max(1, Math.min(100, i.cantidad + Number(b.dataset.d))); guardarCarrito(); vistaCarrito(); });
+  app.querySelectorAll("[data-q]").forEach(b => b.onclick = () => { carrito.splice(Number(b.dataset.q), 1); guardarCarrito(); vistaCarrito(); });
+  app.querySelectorAll("input[name=punto]").forEach(r => r.onchange = () => guardar("ll_punto", r.value));
+  $("#confirmar").onclick = async () => {
+    if (!usuario) { sessionStorage.setItem("ll_volver", "#/carrito"); return ir("#/entrar"); }
+    const punto = (app.querySelector("input[name=punto]:checked") || {}).value;
+    if (!punto) { $("#errCarrito").innerHTML = `<div class="err">Elige un punto de entrega</div>`; return; }
+    const b = $("#confirmar"); b.disabled = true; b.textContent = "Enviando pedido…";
+    try {
+      const j = await api("crearPedido", {items: carrito, puntoId: punto, nota: $("#nota").value});
+      carrito = []; guardarCarrito(); guardar("ll_punto", punto);
+      toast("¡Pedido " + j.pedido.numero + " registrado! 🎉");
+      ir("#/pedido/" + encodeURIComponent(j.pedido.numero));
+    } catch (e) { $("#errCarrito").innerHTML = `<div class="err">${esc(e.message)}</div>`; b.disabled = false; b.textContent = "✅ Confirmar pedido"; }
+  };
+}
+
+/* ===================== Entrar / registro / recuperar ===================== */
+function vistaEntrar(modo) {
+  if (usuario && modo !== "recuperar") return ir("#/cuenta");
+  modo = modo || "login";
+  const tabs = `<div class="tabs" role="tablist"><button role="tab" aria-selected="${modo === "login"}" onclick="ir('#/entrar/login')">Entrar</button><button role="tab" aria-selected="${modo === "registro"}" onclick="ir('#/entrar/registro')">Crear cuenta</button></div>`;
+  let form = "";
+  if (modo === "registro") form = `<form id="fm" class="card" novalidate>
+      <label class="f" for="nombre">Nombre</label><input class="inp" id="nombre" autocomplete="name" required maxlength="40">
+      <label class="f" for="tel">Teléfono</label><input class="inp" id="tel" type="tel" inputmode="tel" autocomplete="tel" required placeholder="600 123 456">
+      <label class="f" for="pw">Contraseña</label><input class="inp" id="pw" type="password" autocomplete="new-password" required minlength="6">
+      <div class="help">Mínimo 6 caracteres.</div>
+      <label class="f" for="email">Correo electrónico <span class="muted">(opcional)</span></label><input class="inp" id="email" type="email" inputmode="email" autocomplete="email" placeholder="tucorreo@ejemplo.com">
+      <div class="help">Para avisarte cuando tu llavero esté listo y para recuperar la contraseña si la olvidas.</div>
+      <div id="msg"></div><button class="btn full" style="margin-top:14px">Crear cuenta</button></form>`;
+  else if (modo === "recuperar") form = `<form id="fm" class="card" novalidate>
+      <h2>Recuperar contraseña</h2><p class="muted">Te enviamos un código al correo de tu cuenta.</p>
+      <label class="f" for="tel">Teléfono de tu cuenta</label><input class="inp" id="tel" type="tel" inputmode="tel" autocomplete="tel" required>
+      <div id="paso2" class="oculto"><label class="f" for="cod">Código recibido por correo</label><input class="inp" id="cod" inputmode="numeric" autocomplete="one-time-code" maxlength="6">
+      <label class="f" for="pw">Contraseña nueva</label><input class="inp" id="pw" type="password" autocomplete="new-password" minlength="6"></div>
+      <div id="msg"></div><button class="btn full" id="bRec" style="margin-top:14px">Enviarme el código</button>
+      <button type="button" class="lnk" onclick="ir('#/entrar/login')">← Volver</button></form>`;
+  else form = `<form id="fm" class="card" novalidate>
+      <label class="f" for="tel">Teléfono</label><input class="inp" id="tel" type="tel" inputmode="tel" autocomplete="tel" required>
+      <label class="f" for="pw">Contraseña</label><input class="inp" id="pw" type="password" autocomplete="current-password" required>
+      <div id="msg"></div><button class="btn full" style="margin-top:14px">Entrar</button>
+      <button type="button" class="lnk" onclick="ir('#/entrar/recuperar')">¿Has olvidado la contraseña?</button></form>`;
+  app.innerHTML = `<div class="stack" style="max-width:460px;margin:auto"><h1>${modo === "registro" ? "Crea tu cuenta" : modo === "recuperar" ? "¿Sin contraseña?" : "¡Hola de nuevo! 👋"}</h1>${modo !== "recuperar" ? tabs : ""}${form}</div>`;
+  const msg = (t, ok) => $("#msg").innerHTML = `<div class="${ok ? "okmsg" : "err"}">${esc(t)}</div>`;
+  let paso = 1;
+  $("#fm").onsubmit = async e => {
+    e.preventDefault();
+    const b = $("#fm").querySelector(".btn"); b.disabled = true;
+    try {
+      let j;
+      if (modo === "registro") j = await api("registro", {nombre: $("#nombre").value, telefono: $("#tel").value, password: $("#pw").value, email: $("#email").value});
+      else if (modo === "login") j = await api("login", {telefono: $("#tel").value, password: $("#pw").value});
+      else if (paso === 1) { const r = await api("recuperar", {telefono: $("#tel").value}); msg(r.mensaje, true); $("#paso2").classList.remove("oculto"); b.textContent = "Cambiar contraseña"; paso = 2; b.disabled = false; return; }
+      else j = await api("restablecer", {telefono: $("#tel").value, codigo: $("#cod").value, nueva: $("#pw").value});
+      setSesion(j.token, j.usuario);
+      toast("¡Hola, " + j.usuario.nombre + "!");
+      const v = sessionStorage.getItem("ll_volver"); sessionStorage.removeItem("ll_volver");
+      ir(v || (j.usuario.rol === "admin" ? "#/admin" : carrito.length ? "#/carrito" : "#/pedidos"));
+    } catch (err) { msg(err.message); b.disabled = false; }
+  };
+}
+
+/* ===================== Mis pedidos ===================== */
+async function vistaPedidos() {
+  cargando("Cargando tus pedidos…");
+  const j = await api("misPedidos");
+  if (!j.pedidos.length) { app.innerHTML = `<div class="card vacio"><div class="big">📦</div><h2>Aún no tienes pedidos</h2><a class="btn" href="#/">✨ Crear mi primer llavero</a></div>`; return; }
+  app.innerHTML = `<div class="stack"><h1>Mis pedidos</h1>${j.pedidos.map(p => tarjetaPedido(p)).join("")}</div>`;
+}
+function chip(e) { return `<span class="chip e-${esc(e)}">${esc((cat.estados || {})[e] || e)}</span>`; }
+function tarjetaPedido(p, admin) {
+  const uds = p.items.reduce((s, i) => s + i.cantidad, 0);
+  return `<a class="card pedidoCard" href="${admin ? "javascript:void 0" : "#/pedido/" + encodeURIComponent(p.numero)}" ${admin ? `data-num="${esc(p.numero)}"` : ""}>
+    <div class="row between"><b style="font-family:var(--head);font-size:1.15rem">${esc(p.numero)}</b>${chip(p.estado)}</div>
+    <div class="muted" style="font-size:.9rem;margin-top:2px">${admin ? `<b style="color:var(--ink)">${esc(p.nombre)}</b> · ${esc(p.telefono)} · ` : ""}${fecha(p.fecha)} · ${uds} llavero${uds > 1 ? "s" : ""} · 📍 ${esc(p.punto.nombre)}</div>
+    <div class="row between" style="align-items:flex-end"><div class="miniPrev">${p.items.slice(0, 6).map(i => svgLlavero(i, {sinAnilla: true})).join("")}</div><b class="num" style="font-size:1.15rem">${euros(p.total)}</b></div>
+    ${admin && p.estado === "pendiente_verificacion" ? `<div class="aviso" style="margin-top:10px">💶 Justificante subido: comprueba el Bizum</div>` : ""}
+  </a>`;
+}
+
+/* ===================== Detalle de pedido (cliente) ===================== */
+const PASOS = ["pendiente_pago", "pendiente_verificacion", "confirmado", "fabricacion", "listo", "entregado"];
+const PASOS_TXT = {pendiente_pago: "Pagar por Bizum", pendiente_verificacion: "Comprobamos el pago", confirmado: "Pago confirmado", fabricacion: "Imprimiendo en 3D", listo: "Listo para recoger", entregado: "Entregado"};
+async function vistaPedido(numero) {
+  cargando("Cargando pedido…");
+  const j = await api("verPedido", {numero});
+  const p = j.pedido, cfg = cat.config, idx = PASOS.indexOf(p.estado);
+  const pagable = p.estado === "pendiente_pago" || p.estado === "pendiente_verificacion";
+  const concepto = "Pedido " + p.numero;
+  app.innerHTML = `<div class="stack">
+    <div class="row between"><div><div class="muted" style="font-weight:700">Pedido</div><h1>${esc(p.numero)}</h1></div>${chip(p.estado)}</div>
+    ${p.estado === "pendiente_pago" ? (cfg.bizum_telefono ? `<section class="pago">
+      <h2>💸 Paga con Bizum</h2><div class="imp num">${euros(p.total)}</div>
+      <div class="dato"><span><small>Envía el Bizum a</small><b>${esc(cfg.bizum_telefono)}</b>${cfg.bizum_titular ? `<small>${esc(cfg.bizum_titular)}</small>` : ""}</span><button class="copiar" data-c="${esc(cfg.bizum_telefono)}">Copiar</button></div>
+      <div class="dato"><span><small>Concepto (escríbelo tal cual)</small><b>${esc(concepto)}</b></span><button class="copiar" data-c="${esc(concepto)}">Copiar</button></div>
+      <div class="dato"><span><small>Importe exacto</small><b class="num">${euros(p.total)}</b></span><button class="copiar" data-c="${String(p.total.toFixed(2)).replace(".", ",")}">Copiar</button></div>
+      <ol><li>Abre la app de tu banco y entra en <b>Bizum</b> → <b>Enviar dinero</b>.</li><li>Pon el teléfono, el importe y el concepto de arriba.</li><li>Haz una <b>captura</b> de la pantalla de confirmación y súbela aquí abajo.</li></ol>
+    </section>` : `<div class="aviso">Te indicaremos cómo hacer el pago muy pronto.</div>`) : ""}
+    ${pagable ? `<section class="card"><h3>🧾 Justificante del Bizum</h3>
+      ${p.tieneJustificante ? `<div class="okmsg">✅ Recibido el ${fecha(p.justificanteFecha)}. Lo estamos comprobando; te avisaremos cuando esté confirmado.</div>` : `<p class="muted">Sube la captura de pantalla del Bizum para que podamos comprobarlo.</p>`}
+      <input type="file" id="fJust" accept="image/*,application/pdf" class="oculto">
+      <div id="msgJ"></div>
+      <div class="row" style="margin-top:10px"><button class="btn ${p.tieneJustificante ? "sec" : ""}" id="bJust">📷 ${p.tieneJustificante ? "Cambiar captura" : "Subir captura del Bizum"}</button>${p.tieneJustificante ? `<button class="btn lin sm" id="bVerJ">Ver captura</button>` : ""}</div>
+    </section>` : ""}
+    <section class="card"><h3>Estado del pedido</h3>
+      ${p.estado === "cancelado" ? `<div class="err">Este pedido está cancelado.</div>` : `<ol class="linea">${PASOS.map((e, k) => `<li class="${k < idx ? "hecho" : k === idx ? "actual" : ""}"><span class="p">${k < idx ? "✓" : k + 1}</span><span class="tx"><b>${PASOS_TXT[e]}</b>${e === "listo" && k === idx ? `<br><span class="muted">Recógelo en ${esc(p.punto.nombre)}</span>` : ""}</span></li>`).join("")}</ol>`}
+    </section>
+    <section class="card"><h3>Tus llaveros</h3>${p.items.map(i => `<div class="item">${svgLlavero(i)}<div><div class="t">${esc(i.emoji)} ${esc(i.texto || "(sin texto)")}</div><div class="d">${esc(i.modelo)} · ${esc(i.color)}<br>${i.cantidad} × ${euros(i.precio)}</div></div><b class="num">${euros(i.subtotal)}</b></div>`).join("")}
+      <div class="row between" style="margin-top:10px"><b>Total</b><b class="num" style="font-size:1.3rem">${euros(p.total)}</b></div></section>
+    <section class="card"><h3>📍 Punto de entrega</h3><p style="margin:6px 0 0"><b>${esc(p.punto.nombre)}</b>${p.punto.direccion ? "<br>" + esc(p.punto.direccion) : ""}${p.punto.horario ? "<br>🕒 " + esc(p.punto.horario) : ""}</p>
+      ${p.notaCliente ? `<p class="muted" style="margin-bottom:0">📝 ${esc(p.notaCliente)}</p>` : ""}</section>
+    ${pagable ? `<button class="btn lin full" id="bCancel">Cancelar pedido</button>` : ""}
+    <a class="lnk" href="#/pedidos">← Ver todos mis pedidos</a>
+  </div>`;
+  app.querySelectorAll(".copiar").forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.c); toast("Copiado ✓"); } catch (e) { toast(b.dataset.c); } });
+  if ($("#bJust")) {
+    $("#bJust").onclick = () => $("#fJust").click();
+    $("#fJust").onchange = async () => {
+      const f = $("#fJust").files[0]; if (!f) return;
+      const b = $("#bJust"); b.disabled = true; b.textContent = "Subiendo…";
+      try {
+        const a = await prepararArchivo(f);
+        await api("subirJustificante", {numero: p.numero, data: a.data, mime: a.mime});
+        toast("¡Justificante recibido! ✅"); vistaPedido(p.numero);
+      } catch (e) { $("#msgJ").innerHTML = `<div class="err">${esc(e.message)}</div>`; b.disabled = false; b.textContent = "📷 Subir captura del Bizum"; }
+    };
+  }
+  if ($("#bVerJ")) $("#bVerJ").onclick = () => verJustificante(p.numero);
+  if ($("#bCancel")) $("#bCancel").onclick = () => confirmar("¿Cancelar el pedido " + p.numero + "?", "Si ya has hecho el Bizum, avísanos para devolvértelo.", "Sí, cancelar", async () => {
+    try { await api("cancelarPedido", {numero: p.numero}); toast("Pedido cancelado"); vistaPedido(p.numero); } catch (e) { toast(e.message); }
+  });
+}
+
+function prepararArchivo(f) {
+  return new Promise((ok, ko) => {
+    if (f.size > 15e6) return ko(new Error("El archivo es demasiado grande (máx. 15 MB)"));
+    if (f.type === "application/pdf") {
+      if (f.size > 6e6) return ko(new Error("El PDF es demasiado grande (máx. 6 MB)"));
+      const r = new FileReader(); r.onload = () => ok({mime: "application/pdf", data: String(r.result).split(",")[1]}); r.onerror = () => ko(new Error("No se pudo leer el archivo")); r.readAsDataURL(f); return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 1600 / Math.max(img.width, img.height));
+      const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(img.src);
+      ok({mime: "image/jpeg", data: c.toDataURL("image/jpeg", 0.85).split(",")[1]});
+    };
+    img.onerror = () => ko(new Error("No se pudo abrir la imagen. Prueba con una captura de pantalla."));
+    img.src = URL.createObjectURL(f);
+  });
+}
+async function verJustificante(numero) {
+  modal(`<div class="cargando"><div class="spin"></div>Cargando justificante…</div>`, "Justificante · " + numero);
+  try {
+    const j = await api("verJustificante", {numero});
+    const src = `data:${j.mime};base64,${j.data}`;
+    $("#modalCuerpo").innerHTML = j.mime === "application/pdf"
+      ? `<iframe src="${src}" style="width:100%;height:70vh;border:0;border-radius:12px" title="Justificante"></iframe>`
+      : `<div class="justif"><img src="${src}" alt="Justificante del Bizum"></div>`;
+  } catch (e) { $("#modalCuerpo").innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+}
+
+/* ===================== Cuenta ===================== */
+function vistaCuenta() {
+  app.innerHTML = `<div class="stack" style="max-width:520px;margin:auto">
+    <h1>Mi cuenta</h1>
+    ${usuario.rol === "admin" ? `<a class="btn" href="#/admin" style="background:var(--ink)">⚙️ Ir al panel de administración</a>` : ""}
+    <form class="card" id="fd" novalidate><h3>Mis datos</h3>
+      <label class="f" for="nombre">Nombre</label><input class="inp" id="nombre" value="${esc(usuario.nombre)}" maxlength="40">
+      <label class="f">Teléfono</label><input class="inp" value="${esc(usuario.telefono)}" disabled>
+      <label class="f" for="email">Correo electrónico</label><input class="inp" id="email" type="email" value="${esc(usuario.email || "")}" placeholder="Para recibir avisos de tus pedidos">
+      <details style="margin-top:14px"><summary style="font-weight:800;cursor:pointer">Cambiar contraseña</summary>
+        <label class="f" for="pa">Contraseña actual</label><input class="inp" id="pa" type="password" autocomplete="current-password">
+        <label class="f" for="pn">Contraseña nueva</label><input class="inp" id="pn" type="password" autocomplete="new-password" minlength="6"></details>
+      <div id="msg"></div><button class="btn full" style="margin-top:14px">Guardar</button></form>
+    <a class="btn sec" href="#/pedidos">📦 Mis pedidos</a>
+    <button class="btn lin" id="salir">Cerrar sesión</button></div>`;
+  $("#fd").onsubmit = async e => {
+    e.preventDefault();
+    try {
+      const j = await api("cambiarDatos", {nombre: $("#nombre").value, email: $("#email").value, actual: $("#pa").value, nueva: $("#pn").value});
+      setSesion(token, j.usuario); $("#msg").innerHTML = `<div class="okmsg">Datos guardados ✓</div>`; $("#pa").value = $("#pn").value = "";
+    } catch (err) { $("#msg").innerHTML = `<div class="err">${esc(err.message)}</div>`; }
+  };
+  $("#salir").onclick = async () => { try { await api("salir", {}, {silencio: true}); } catch (e) {} setSesion(null, null); toast("Has cerrado sesión"); ir("#/"); };
+}
+
+/* ===================== Ventanas ===================== */
+function modal(html, titulo) {
+  $("#modales").innerHTML = `<div class="modal" id="mod" role="dialog" aria-modal="true"><div class="caja">
+    ${titulo !== "" ? `<div class="cab"><h2>${esc(titulo || "")}</h2><button class="cerrar" aria-label="Cerrar" onclick="cerrarModal()">×</button></div>` : ""}
+    <div id="modalCuerpo">${html}</div></div></div>`;
+  $("#mod").onclick = e => { if (e.target.id === "mod") cerrarModal(); };
+  document.body.style.overflow = "hidden";
+}
+function cerrarModal() { $("#modales").innerHTML = ""; document.body.style.overflow = ""; }
+function confirmar(titulo, texto, ok, fn, peligro) {
+  modal(`<p style="margin-top:0">${esc(texto)}</p><div class="grid2"><button class="btn lin" onclick="cerrarModal()">No</button><button class="btn ${peligro === false ? "" : "bad"}" id="mOk">${esc(ok)}</button></div>`, titulo);
+  $("#mOk").onclick = () => { cerrarModal(); fn(); };
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape" && $("#mod")) cerrarModal(); });
+
+/* ===================== Panel de administración ===================== */
+async function cargarAdmin() { adm = await api("adminDatos"); cat.estados = adm.estados; }
+async function vistaAdmin() {
+  if (!adm) { cargando("Cargando panel…"); await cargarAdmin(); }
+  const tabs = [["pedidos", "📦 Pedidos"], ["ventas", "📊 Ventas"], ["catalogo", "🎨 Catálogo"], ["puntos", "📍 Puntos"], ["usuarios", "👥 Usuarios"], ["ajustes", "⚙️ Ajustes"]];
+  const pend = adm.pedidos.filter(p => p.estado === "pendiente_verificacion").length;
+  app.innerHTML = `<div class="stack">
+    <div class="row between"><h1>Panel</h1><button class="btn lin sm" id="refrescar">↻ Actualizar</button></div>
+    <div class="atabs" role="tablist">${tabs.map(([k, t]) => `<button role="tab" data-t="${k}" aria-selected="${admTab === k}">${t}${k === "pedidos" && pend ? ` <span class="chip e-pendiente_verificacion" style="padding:1px 8px">${pend}</span>` : ""}</button>`).join("")}</div>
+    <div id="adm"></div></div>`;
+  app.querySelectorAll(".atabs button").forEach(b => b.onclick = () => { admTab = b.dataset.t; vistaAdmin(); });
+  $("#refrescar").onclick = async () => { cargando("Actualizando…"); await cargarAdmin(); vistaAdmin(); };
+  ({pedidos: admPedidos, ventas: admVentas, catalogo: admCatalogo, puntos: admPuntos, usuarios: admUsuarios, ajustes: admAjustes})[admTab]();
+}
+
+function admPedidos() {
+  const f = admFiltro, puntos = [...new Set(adm.pedidos.map(p => p.punto.nombre))];
+  const cuenta = {}; adm.pedidos.forEach(p => cuenta[p.estado] = (cuenta[p.estado] || 0) + 1);
+  const q = f.q.trim().toLowerCase();
+  const lista = adm.pedidos.filter(p => (!f.estado || p.estado === f.estado) && (!f.punto || p.punto.nombre === f.punto)
+    && (!f.desde || p.fecha.slice(0, 10) >= f.desde) && (!f.hasta || p.fecha.slice(0, 10) <= f.hasta)
+    && (!q || (p.nombre + " " + p.telefono + " " + p.numero).toLowerCase().includes(q)));
+  $("#adm").innerHTML = `<div class="stack">
+    <div class="estChips">${Object.keys(adm.estados).map(e => `<button class="chip e-${e}" data-e="${e}" aria-pressed="${f.estado === e}">${esc(adm.estados[e])} · ${cuenta[e] || 0}</button>`).join("")}</div>
+    <div class="card filtros">
+      <input class="inp" id="fq" placeholder="🔍 Cliente, teléfono o nº" value="${esc(f.q)}">
+      <select class="inp" id="fe"><option value="">Todos los estados</option>${Object.keys(adm.estados).map(e => `<option value="${e}" ${f.estado === e ? "selected" : ""}>${esc(adm.estados[e])}</option>`).join("")}</select>
+      <select class="inp" id="fp"><option value="">Todos los puntos</option>${puntos.map(p => `<option ${f.punto === p ? "selected" : ""}>${esc(p)}</option>`).join("")}</select>
+      <input class="inp" type="date" id="fd" value="${f.desde}" aria-label="Desde">
+      <input class="inp" type="date" id="fh" value="${f.hasta}" aria-label="Hasta">
+      <button class="btn lin sm" id="fx">Quitar filtros</button>
+    </div>
+    <div class="muted" style="font-weight:700">${lista.length} pedido${lista.length === 1 ? "" : "s"} · ${euros(lista.reduce((s, p) => s + p.total, 0))}</div>
+    ${lista.length ? lista.map(p => tarjetaPedido(p, true)).join("") : `<div class="card vacio">No hay pedidos con estos filtros.</div>`}
+  </div>`;
+  const set = (k, v) => { admFiltro[k] = v; admPedidos(); };
+  app.querySelectorAll(".estChips button").forEach(b => b.onclick = () => set("estado", f.estado === b.dataset.e ? "" : b.dataset.e));
+  $("#fq").oninput = e => { admFiltro.q = e.target.value; clearTimeout(admPedidos.t); admPedidos.t = setTimeout(() => { admPedidos(); const i = $("#fq"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 350); };
+  $("#fe").onchange = e => set("estado", e.target.value);
+  $("#fp").onchange = e => set("punto", e.target.value);
+  $("#fd").onchange = e => set("desde", e.target.value);
+  $("#fh").onchange = e => set("hasta", e.target.value);
+  $("#fx").onclick = () => { admFiltro = {estado: "", punto: "", desde: "", hasta: "", q: ""}; admPedidos(); };
+  app.querySelectorAll("[data-num]").forEach(a => a.onclick = e => { e.preventDefault(); admDetalle(a.dataset.num); });
+}
+
+const ACCIONES_ESTADO = {
+  pendiente_pago: [["confirmado", "✅ Pago recibido (confirmar)", "ok"]],
+  pendiente_verificacion: [["confirmado", "✅ Pago verificado", "ok"], ["pendiente_pago", "↩︎ No ha llegado el Bizum", "warn"]],
+  confirmado: [["fabricacion", "🛠️ Pasar a fabricación", ""]],
+  fabricacion: [["listo", "🎉 Listo para entregar (avisa al cliente)", "ok"]],
+  listo: [["entregado", "📦 Marcar como entregado", ""]],
+  entregado: [], cancelado: []
+};
+async function admDetalle(numero) {
+  modal(`<div class="cargando"><div class="spin"></div>Cargando…</div>`, "Pedido " + numero);
+  let j;
+  try { j = await api("verPedido", {numero}); } catch (e) { $("#modalCuerpo").innerHTML = `<div class="err">${esc(e.message)}</div>`; return; }
+  const p = j.pedido, tel = String(p.telefono).length === 9 ? "34" + p.telefono : p.telefono;
+  const acc = ACCIONES_ESTADO[p.estado] || [];
+  $("#modalCuerpo").innerHTML = `<div class="stack">
+    <div class="row between">${chip(p.estado)}<span class="muted">${fecha(p.fecha)}</span></div>
+    <div class="card"><b style="font-size:1.1rem">${esc(p.nombre)}</b><br><span class="muted">${esc(p.telefono)}${p.email ? " · " + esc(p.email) : ""}</span>
+      <div class="row" style="margin-top:10px"><a class="btn sm sec" href="tel:${esc(p.telefono)}">📞 Llamar</a><a class="btn sm sec" href="https://wa.me/${esc(tel)}" target="_blank" rel="noopener">💬 WhatsApp</a></div></div>
+    ${p.estado === "pendiente_verificacion" || p.tieneJustificante ? `<div class="card"><div class="row between"><b>🧾 Justificante Bizum</b><span class="muted">${fecha(p.justificanteFecha)}</span></div>
+      <p class="muted" style="margin:6px 0">Comprueba en tu banco que ha llegado un Bizum de <b>${euros(p.total)}</b> con concepto <b>Pedido ${esc(p.numero)}</b>.</p>
+      ${p.tieneJustificante ? `<button class="btn sm lin" id="vj">Ver justificante</button>` : ""}</div>` : ""}
+    ${acc.length || p.estado !== "cancelado" ? `<div class="card stack" style="gap:10px"><b>Siguiente paso</b>
+      ${acc.map(([e, t, c]) => `<button class="btn full ${c}" data-est="${e}">${t}</button>`).join("")}
+      <input class="inp" id="notaE" placeholder="Nota para el cliente (opcional)" maxlength="300">
+      <details><summary style="font-weight:700;cursor:pointer">Cambiar a otro estado</summary>
+        <div class="row" style="margin-top:8px"><select class="inp" id="otroE" style="flex:1">${Object.keys(adm.estados).filter(e => e !== p.estado).map(e => `<option value="${e}">${esc(adm.estados[e])}</option>`).join("")}</select><button class="btn sm" id="bOtro">Aplicar</button></div></details>
+    </div>` : ""}
+    <div class="card"><b>Llaveros</b>${p.items.map(i => `<div class="item">${svgLlavero(i)}<div><div class="t">${esc(i.emoji)} ${esc(i.texto || "(sin texto)")}</div><div class="d">${esc(i.modelo)} · ${esc(i.color)}<br><b>${i.cantidad} ud.</b> × ${euros(i.precio)}</div></div><b class="num">${euros(i.subtotal)}</b></div>`).join("")}
+      <div class="row between"><b>Total</b><b class="num" style="font-size:1.2rem">${euros(p.total)}</b></div></div>
+    <div class="card"><b>📍 ${esc(p.punto.nombre)}</b>${p.punto.direccion ? "<br><span class='muted'>" + esc(p.punto.direccion) + "</span>" : ""}${p.notaCliente ? `<p style="margin-bottom:0">📝 ${esc(p.notaCliente)}</p>` : ""}</div>
+    <div class="card"><b>Historial</b><ul style="margin:8px 0 0;padding-left:18px">${j.historial.map(h => `<li><b>${esc(h.texto)}</b> · ${fecha(h.fecha)} · ${esc(h.por)}${h.nota ? `<br><span class="muted">${esc(h.nota)}</span>` : ""}</li>`).join("")}</ul></div>
+  </div>`;
+  if ($("#vj")) $("#vj").onclick = () => verJustificante(p.numero).then(() => {
+    const vuelta = document.createElement("button"); vuelta.className = "btn lin full"; vuelta.style.marginTop = "12px"; vuelta.textContent = "← Volver al pedido";
+    vuelta.onclick = () => admDetalle(p.numero); $("#modalCuerpo").appendChild(vuelta);
+  });
+  const aplicar = async (estado, b) => {
+    b.disabled = true;
+    try {
+      const r = await api("cambiarEstado", {numero: p.numero, estado, nota: $("#notaE") ? $("#notaE").value : ""});
+      const k = adm.pedidos.findIndex(x => x.numero === p.numero); if (k >= 0) adm.pedidos[k] = r.pedido;
+      toast("Estado: " + adm.estados[estado] + (["confirmado", "listo", "entregado", "cancelado"].includes(estado) && p.email ? " · cliente avisado ✉️" : ""));
+      admDetalle(p.numero); if (admTab === "pedidos") admPedidos();
+    } catch (e) { toast(e.message); b.disabled = false; }
+  };
+  $("#modalCuerpo").querySelectorAll("[data-est]").forEach(b => b.onclick = () => aplicar(b.dataset.est, b));
+  if ($("#bOtro")) $("#bOtro").onclick = e => { const v = $("#otroE").value; if (v === "cancelado") confirmar("¿Cancelar el pedido?", "Se avisará al cliente.", "Cancelar pedido", () => aplicar(v, e.target).then(() => {})); else aplicar(v, e.target); };
+}
+
+function admVentas() {
+  const hoy = new Date(), mesAct = hoy.toISOString().slice(0, 7);
+  const periodo = admVentas.p || "mes";
+  const enPeriodo = p => periodo === "todo" ? true : periodo === "anio" ? p.fecha.slice(0, 4) === String(hoy.getFullYear()) : periodo === "mesAnt" ? p.fecha.slice(0, 7) === new Date(hoy.getFullYear(), hoy.getMonth() - 1, 15).toISOString().slice(0, 7) : p.fecha.slice(0, 7) === mesAct;
+  const cobr = ["confirmado", "fabricacion", "listo", "entregado"];
+  const ps = adm.pedidos.filter(enPeriodo), venta = ps.filter(p => cobr.includes(p.estado));
+  const ingresos = venta.reduce((s, p) => s + p.total, 0), uds = venta.reduce((s, p) => s + p.items.reduce((a, i) => a + i.cantidad, 0), 0);
+  const suma = est => ps.filter(p => p.estado === est).reduce((s, p) => s + p.total, 0);
+  const agrupar = (arr, key, val) => { const o = {}; arr.forEach(x => { const k = key(x); o[k] = (o[k] || 0) + val(x); }); return Object.entries(o).sort((a, b) => b[1] - a[1]); };
+  const barras = (filas, fmt) => { const max = Math.max(1, ...filas.map(f => f[1])); return filas.length ? `<div class="barras">${filas.map(([k, v]) => `<div class="b"><span>${esc(k)}</span><span class="tr"><span class="fi" style="width:${v / max * 100}%"></span></span><span class="num">${fmt(v)}</span></div>`).join("")}</div>` : `<p class="muted">Sin datos.</p>`; };
+  const items = venta.flatMap(p => p.items);
+  const meses = []; for (let k = 5; k >= 0; k--) { const d = new Date(hoy.getFullYear(), hoy.getMonth() - k, 15); meses.push(d.toISOString().slice(0, 7)); }
+  const porMes = meses.map(m => [new Date(m + "-15").toLocaleDateString("es-ES", {month: "short", year: "2-digit"}), adm.pedidos.filter(p => cobr.includes(p.estado) && p.fecha.slice(0, 7) === m).reduce((s, p) => s + p.total, 0)]);
+  $("#adm").innerHTML = `<div class="stack">
+    <select class="inp" id="per" style="max-width:260px"><option value="mes">Este mes</option><option value="mesAnt">Mes anterior</option><option value="anio">Este año</option><option value="todo">Todo</option></select>
+    <div class="kpis">
+      <div class="kpi verde"><small>Ventas confirmadas</small><b class="num">${euros(ingresos)}</b></div>
+      <div class="kpi"><small>Pedidos pagados</small><b class="num">${venta.length}</b></div>
+      <div class="kpi"><small>Llaveros vendidos</small><b class="num">${uds}</b></div>
+      <div class="kpi"><small>Ticket medio</small><b class="num">${euros(venta.length ? ingresos / venta.length : 0)}</b></div>
+      <div class="kpi nar"><small>Por verificar</small><b class="num">${euros(suma("pendiente_verificacion"))}</b></div>
+      <div class="kpi nar"><small>Pendiente de pago</small><b class="num">${euros(suma("pendiente_pago"))}</b></div>
+    </div>
+    <section class="card"><h3 style="margin-bottom:10px">Últimos 6 meses</h3>${barras(porMes, euros)}</section>
+    <section class="card"><h3 style="margin-bottom:10px">Por modelo (unidades)</h3>${barras(agrupar(items, i => i.modelo, i => i.cantidad), v => v + " ud.")}</section>
+    <section class="card"><h3 style="margin-bottom:10px">Emojis favoritos</h3>${barras(agrupar(items.filter(i => i.emoji), i => i.emoji, i => i.cantidad).slice(0, 8), v => v + " ud.")}</section>
+    <section class="card"><h3 style="margin-bottom:10px">Por punto de entrega</h3>${barras(agrupar(venta, p => p.punto.nombre, p => p.total), euros)}</section>
+    <p class="help">«Ventas confirmadas» suma los pedidos con el pago verificado (confirmado, en fabricación, listo o entregado).</p>
+  </div>`;
+  $("#per").value = periodo; $("#per").onchange = e => { admVentas.p = e.target.value; admVentas(); };
+}
+
+function partirEmojis(t) {
+  const s = String(t || "").replace(/\s+/g, "");
+  if (window.Intl && Intl.Segmenter) return Array.from(new Intl.Segmenter("es", {granularity: "grapheme"}).segment(s), x => x.segment);
+  return String(t || "").split(/\s+/).filter(Boolean);
+}
+function admCatalogo() {
+  const c = JSON.parse(JSON.stringify(adm.catalogo));
+  const pintar = () => {
+    $("#adm").innerHTML = `<div class="stack">
+      <section class="card"><h3>Modelos y precios</h3><p class="help">El precio es por unidad. Desactiva un modelo para ocultarlo sin borrarlo.</p>
+        <div class="tabla">${c.modelos.map((m, k) => `<div class="fila mod">
+          <span>${svgLlavero({forma: m.forma, hex: "#c9bbff"}, {sinAnilla: true})}</span>
+          <input class="inp" data-m="${k}" data-k="nombre" value="${esc(m.nombre)}" placeholder="Nombre" aria-label="Nombre">
+          <select class="inp" data-m="${k}" data-k="forma" aria-label="Forma">${adm.formas.map(f => `<option ${m.forma === f ? "selected" : ""}>${f}</option>`).join("")}</select>
+          <input class="inp precio" data-m="${k}" data-k="precio" value="${String(m.precio).replace(".", ",")}" inputmode="decimal" aria-label="Precio en euros">
+          <label class="chk"><input type="checkbox" data-m="${k}" data-k="activo" ${m.activo ? "checked" : ""}>Activo</label>
+          <button class="x" data-xm="${k}" aria-label="Borrar">✕</button></div>`).join("")}</div>
+        <button class="btn sec sm" id="addM" style="margin-top:10px">＋ Añadir modelo</button></section>
+      <section class="card"><h3>Colores</h3>
+        <div class="tabla">${c.colores.map((x, k) => `<div class="fila colr">
+          <input type="color" data-c="${k}" data-k="hex" value="${esc(x.hex)}" style="width:48px;height:44px;border:0;background:none" aria-label="Color">
+          <input class="inp" data-c="${k}" data-k="nombre" value="${esc(x.nombre)}" aria-label="Nombre del color">
+          <label class="chk"><input type="checkbox" data-c="${k}" data-k="activo" ${x.activo ? "checked" : ""}>Activo</label>
+          <button class="x" data-xc="${k}" aria-label="Borrar">✕</button></div>`).join("")}</div>
+        <button class="btn sec sm" id="addC" style="margin-top:10px">＋ Añadir color</button></section>
+      <section class="card"><h3>Emojis</h3><p class="help">Toca un emoji para activarlo o desactivarlo (los apagados no se muestran a los clientes). Mantén pulsado para borrarlo.</p>
+        <div class="emoAdmin">${c.emojis.map((e, k) => `<button class="${e.activo ? "" : "off"}" data-e="${k}" aria-pressed="${e.activo}">${esc(e.emoji)}</button>`).join("")}</div>
+        <div class="row" style="margin-top:10px"><input class="inp" id="nuevosE" placeholder="Pega aquí emojis nuevos: 🐙🦖🎃" style="flex:1"><button class="btn sm" id="addE">Añadir</button></div></section>
+      <div id="msgC"></div>
+      <button class="btn full" id="guardarC">💾 Guardar catálogo</button></div>`;
+    $("#adm").querySelectorAll("[data-m]").forEach(i => i.oninput = i.onchange = () => { const m = c.modelos[i.dataset.m]; m[i.dataset.k] = i.type === "checkbox" ? i.checked : i.value; if (i.dataset.k === "forma") pintar(); });
+    $("#adm").querySelectorAll("[data-c]").forEach(i => i.oninput = i.onchange = () => { c.colores[i.dataset.c][i.dataset.k] = i.type === "checkbox" ? i.checked : i.value; });
+    $("#adm").querySelectorAll("[data-xm]").forEach(b => b.onclick = () => { c.modelos.splice(b.dataset.xm, 1); pintar(); });
+    $("#adm").querySelectorAll("[data-xc]").forEach(b => b.onclick = () => { c.colores.splice(b.dataset.xc, 1); pintar(); });
+    $("#adm").querySelectorAll("[data-e]").forEach(b => {
+      let t = null, largoP = false;
+      b.onpointerdown = () => { largoP = false; t = setTimeout(() => { largoP = true; c.emojis.splice(b.dataset.e, 1); pintar(); }, 650); };
+      b.onpointerup = b.onpointerleave = () => clearTimeout(t);
+      b.onclick = () => { if (largoP) return; const e = c.emojis[b.dataset.e]; e.activo = !e.activo; pintar(); };
+    });
+    $("#addM").onclick = () => { c.modelos.push({id: "", nombre: "", forma: "circulo", precio: 4, activo: true}); pintar(); };
+    $("#addC").onclick = () => { c.colores.push({id: "", nombre: "", hex: "#9b7bff", activo: true}); pintar(); };
+    $("#addE").onclick = () => { partirEmojis($("#nuevosE").value).forEach(e => { if (!c.emojis.some(x => x.emoji === e)) c.emojis.push({emoji: e, activo: true}); }); pintar(); };
+    $("#guardarC").onclick = async () => {
+      const b = $("#guardarC"); b.disabled = true; b.textContent = "Guardando…";
+      try {
+        const r = await api("guardarCatalogo", {catalogo: {modelos: c.modelos, colores: c.colores, emojis: c.emojis}});
+        adm.catalogo = r.catalogo; await cargarCatalogo(); toast("Catálogo guardado ✓"); admCatalogo();
+      } catch (e) { $("#msgC").innerHTML = `<div class="err">${esc(e.message)}</div>`; b.disabled = false; b.textContent = "💾 Guardar catálogo"; }
+    };
+  };
+  pintar();
+}
+
+function admPuntos() {
+  const ps = JSON.parse(JSON.stringify(adm.catalogo.puntos));
+  const pintar = () => {
+    $("#adm").innerHTML = `<div class="stack"><section class="card"><h3>Puntos de entrega</h3><p class="help">Los clientes eligen uno al hacer el pedido. Aparece en los avisos de «listo para recoger».</p>
+      <div class="tabla">${ps.map((p, k) => `<div class="fila pto"><div class="stack" style="gap:6px">
+        <input class="inp" data-p="${k}" data-k="nombre" value="${esc(p.nombre)}" placeholder="Nombre (ej.: Colegio San José)">
+        <input class="inp" data-p="${k}" data-k="direccion" value="${esc(p.direccion)}" placeholder="Dirección">
+        <input class="inp" data-p="${k}" data-k="horario" value="${esc(p.horario)}" placeholder="Horario de recogida"></div>
+        <label class="chk"><input type="checkbox" data-p="${k}" data-k="activo" ${p.activo ? "checked" : ""}>Activo</label>
+        <button class="x" data-x="${k}" aria-label="Borrar">✕</button></div>`).join("")}</div>
+      <button class="btn sec sm" id="addP" style="margin-top:10px">＋ Añadir punto</button></section>
+      <div id="msgP"></div><button class="btn full" id="guardarP">💾 Guardar puntos</button></div>`;
+    $("#adm").querySelectorAll("[data-p]").forEach(i => i.oninput = i.onchange = () => { ps[i.dataset.p][i.dataset.k] = i.type === "checkbox" ? i.checked : i.value; });
+    $("#adm").querySelectorAll("[data-x]").forEach(b => b.onclick = () => { ps.splice(b.dataset.x, 1); pintar(); });
+    $("#addP").onclick = () => { ps.push({id: "", nombre: "", direccion: "", horario: "", activo: true}); pintar(); };
+    $("#guardarP").onclick = async () => {
+      try { const r = await api("guardarCatalogo", {catalogo: {puntos: ps}}); adm.catalogo = r.catalogo; await cargarCatalogo(); toast("Puntos guardados ✓"); admPuntos(); }
+      catch (e) { $("#msgP").innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+    };
+  };
+  pintar();
+}
+
+function admUsuarios() {
+  const q = (admUsuarios.q || "").toLowerCase();
+  const us = adm.usuarios.filter(u => !q || (u.nombre + " " + u.telefono + " " + u.email).toLowerCase().includes(q));
+  $("#adm").innerHTML = `<div class="stack">
+    <input class="inp" id="uq" placeholder="🔍 Buscar por nombre o teléfono" value="${esc(admUsuarios.q || "")}">
+    <section class="card">${us.map(u => `<div class="usu"><div><b>${esc(u.nombre)}</b> ${u.rol === "admin" ? `<span class="chip" style="background:var(--ink);color:#fff">Admin</span>` : ""} ${u.activo ? "" : `<span class="chip e-cancelado">Desactivado</span>`}
+        <br><span class="muted">${esc(u.telefono)}${u.email ? " · " + esc(u.email) : ""} · ${adm.pedidos.filter(p => p.usuario === u.id).length} pedidos</span></div>
+      <div class="row" style="justify-content:flex-end">
+        <select class="inp" data-rol="${esc(u.id)}" style="min-height:40px;padding:6px 10px;width:auto" aria-label="Rol"><option value="cliente" ${u.rol === "cliente" ? "selected" : ""}>Cliente</option><option value="admin" ${u.rol === "admin" ? "selected" : ""}>Administrador</option></select>
+        <button class="btn lin sm" data-act="${esc(u.id)}">${u.activo ? "Desactivar" : "Activar"}</button>
+        <button class="btn lin sm" data-rp="${esc(u.id)}">🔑 Nueva contraseña</button></div></div>`).join("") || `<p class="muted">Sin resultados.</p>`}</section>
+    <p class="help">Los administradores ven todos los pedidos y este panel. Los clientes solo ven sus propios pedidos.</p></div>`;
+  $("#uq").oninput = e => { admUsuarios.q = e.target.value; clearTimeout(admUsuarios.t); admUsuarios.t = setTimeout(() => { admUsuarios(); const i = $("#uq"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 300); };
+  const cambiar = async (id, datos) => { try { const r = await api("cambiarUsuario", Object.assign({id}, datos)); adm.usuarios = adm.usuarios.map(u => u.id === id ? r.usuario : u); toast("Guardado ✓"); } catch (e) { toast(e.message); } admUsuarios(); };
+  $("#adm").querySelectorAll("[data-rol]").forEach(s => s.onchange = () => cambiar(s.dataset.rol, {rol: s.value}));
+  $("#adm").querySelectorAll("[data-act]").forEach(b => b.onclick = () => { const u = adm.usuarios.find(x => x.id === b.dataset.act); cambiar(u.id, {activo: !u.activo}); });
+  $("#adm").querySelectorAll("[data-rp]").forEach(b => b.onclick = () => {
+    const u = adm.usuarios.find(x => x.id === b.dataset.rp);
+    confirmar("¿Crear contraseña nueva?", `Se generará una contraseña temporal para ${u.nombre}. Su contraseña actual dejará de funcionar.`, "Crear", async () => {
+      try {
+        const r = await api("resetPassword", {id: u.id});
+        const tel = String(u.telefono).length === 9 ? "34" + u.telefono : u.telefono;
+        const txt = `Hola ${u.nombre}, tu nueva contraseña para ${cat.config.negocio} es: ${r.temporal}\nCuando entres, cámbiala en «Mi cuenta».`;
+        modal(`<p>Contraseña temporal de <b>${esc(u.nombre)}</b>:</p><p style="font-family:var(--head);font-size:2rem;font-weight:700;letter-spacing:3px;text-align:center">${esc(r.temporal)}</p>
+          <a class="btn full" href="https://wa.me/${esc(tel)}?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">💬 Enviársela por WhatsApp</a>`, "Contraseña nueva");
+      } catch (e) { toast(e.message); }
+    }, false);
+  });
+}
+
+function admAjustes() {
+  const c = adm.config, url = location.href.split("#")[0];
+  $("#adm").innerHTML = `<div class="stack">
+    <form class="card" id="fa" novalidate><h3>Negocio y Bizum</h3>
+      <label class="f" for="a_negocio">Nombre del negocio</label><input class="inp" id="a_negocio" value="${esc(c.negocio)}">
+      <label class="f" for="a_bizum">Teléfono de Bizum</label><input class="inp" id="a_bizum" type="tel" value="${esc(c.bizum_telefono)}" placeholder="600 123 456">
+      <div class="help">Mientras esté vacío, a los clientes no se les muestran las instrucciones de pago.</div>
+      <label class="f" for="a_titular">Titular del Bizum (opcional)</label><input class="inp" id="a_titular" value="${esc(c.bizum_titular)}" placeholder="Óscar C.">
+      <h3 style="margin-top:20px">Avisos</h3>
+      <label class="f" for="a_emails">Correos que reciben los avisos de pedidos</label><textarea class="inp" id="a_emails" placeholder="oscar@gmail.com, hijo1@gmail.com, hijo2@gmail.com">${esc(c.emails_avisos)}</textarea>
+      <div class="help">Separa varios con comas. Aquí van Óscar y sus hijos.</div>
+      <label class="f" for="a_sms">Teléfonos que reciben SMS de pedidos nuevos</label><input class="inp" id="a_sms" value="${esc(c.telefonos_sms)}" placeholder="600111222, 611222333">
+      <div class="${adm.sms ? "okmsg" : "aviso"}" style="margin-top:8px">${adm.sms ? "✅ SMS activado (Twilio)." : "📵 SMS no activado: hace falta una cuenta de Twilio (de pago). Mientras tanto solo se envían correos."}</div>
+      <h3 style="margin-top:20px">Otros</h3>
+      <label class="f" for="a_admins">Teléfonos que serán administradores al registrarse</label><input class="inp" id="a_admins" value="${esc(c.telefonos_admin)}">
+      <div class="help">Si alguien ya registrado debe ser administrador, cámbialo en «Usuarios».</div>
+      <div class="grid2"><div><label class="f" for="a_tmax">Letras máximas del texto</label><input class="inp" id="a_tmax" inputmode="numeric" value="${esc(c.texto_max)}"></div>
+      <div><label class="f" for="a_umax">Llaveros máx. por pedido</label><input class="inp" id="a_umax" inputmode="numeric" value="${esc(c.pedido_max_unidades)}"></div></div>
+      <div id="msgA"></div><button class="btn full" style="margin-top:14px">💾 Guardar ajustes</button>
+      <button type="button" class="btn sec full" id="probar" style="margin-top:10px">✉️ Enviar aviso de prueba</button></form>
+    <section class="card" style="text-align:center"><h3>Código QR de la tienda</h3><p class="help">Imprímelo o compártelo: al escanearlo se abre la web.</p>
+      <div class="qr" id="qr"></div><p style="word-break:break-all"><a href="${esc(url)}">${esc(url)}</a></p>
+      <button class="btn sec sm" id="bajarQR">⬇️ Descargar QR</button></section></div>`;
+  $("#fa").onsubmit = async e => {
+    e.preventDefault();
+    try {
+      const r = await api("guardarConfig", {config: {negocio: $("#a_negocio").value, bizum_telefono: $("#a_bizum").value, bizum_titular: $("#a_titular").value,
+        emails_avisos: $("#a_emails").value, telefonos_sms: $("#a_sms").value, telefonos_admin: $("#a_admins").value, texto_max: $("#a_tmax").value, pedido_max_unidades: $("#a_umax").value}});
+      adm.config = r.config; await cargarCatalogo(); $("#msgA").innerHTML = `<div class="okmsg">Ajustes guardados ✓</div>`;
+    } catch (err) { $("#msgA").innerHTML = `<div class="err">${esc(err.message)}</div>`; }
+  };
+  $("#probar").onclick = async () => {
+    try { const r = await api("probarAvisos"); $("#msgA").innerHTML = `<div class="okmsg">Correo: ${esc(r.email)} · SMS: ${esc(r.sms)} · Te quedan ${r.cuota} correos hoy.</div>`; }
+    catch (err) { $("#msgA").innerHTML = `<div class="err">${esc(err.message)}</div>`; }
+  };
+  pintarQR(url);
+}
+function pintarQR(url) {
+  const hacer = () => {
+    $("#qr").innerHTML = ""; new QRCode($("#qr"), {text: url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M});
+    $("#bajarQR").onclick = () => { const c = $("#qr canvas"); if (!c) return; const a = document.createElement("a"); a.href = c.toDataURL("image/png"); a.download = "qr-llaveros.png"; a.click(); };
+  };
+  if (window.QRCode) return hacer();
+  const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
+  s.onload = () => { if ($("#qr")) hacer(); }; s.onerror = () => { if ($("#qr")) $("#qr").textContent = "No se pudo cargar el generador de QR."; }; document.head.appendChild(s);
+}
+
+/* ===================== Inicio ===================== */
+pintarCabecera();
+if (window.innerWidth > 520) $("#tbPedTxt").classList.remove("oculto");
+render();
+if (token) api("yo", {}, {silencio: true}).then(j => setSesion(token, j.usuario)).catch(() => {});
+</script>
+</body>
+</html>
