@@ -90,13 +90,13 @@ textarea.inp{min-height:80px;resize:vertical}
 .col[aria-pressed="true"]::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;font-weight:900;color:var(--chk,#fff);font-size:1.2rem}
 .colNom{font-weight:700;margin-top:8px;color:var(--muted)}
 .emojis{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:8px}
-.emo{font-size:28px;height:54px;border:2px solid transparent;background:var(--bg);border-radius:14px;display:grid;place-items:center}
+.emo{font-size:34px;height:60px;border:2px solid transparent;background:var(--bg);border-radius:14px;display:grid;place-items:center}
 .emo[aria-pressed="true"]{border-color:var(--pri);background:var(--pri-soft)}
 .emo.sin{font-size:.8rem;font-weight:800;color:var(--muted)}
-.emo svg{width:40px;height:40px}
+.emo svg{width:48px;height:48px}
 .emojis.grandes{grid-template-columns:repeat(4,1fr);gap:8px}
-.emojis.grandes .emo{height:auto;aspect-ratio:1;border-radius:20px}
-.emojis.grandes .emo svg{width:72%;height:auto}
+.emojis.grandes .emo{height:auto;aspect-ratio:1;border-radius:20px;position:relative;min-height:64px}
+.emojis.grandes .emo svg{position:absolute;left:8%;top:8%;width:84%;height:84%}
 @media(min-width:600px){.emojis.grandes{grid-template-columns:repeat(6,1fr)}}
 .contador{font-size:.85rem;color:var(--muted);text-align:right;margin-top:4px}
 .stepper{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
